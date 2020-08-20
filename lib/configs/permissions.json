@@ -1,0 +1,46 @@
+{
+  "admin": {
+    "menu": {
+      "title": "Administration",
+      "items": [
+        {
+          "icon": "fa fa-thermometer-half fa-1x",
+          "name": "Analytics",
+          "click": "analytics"
+        },
+        {
+          "icon": "fa fa-map",
+          "name": "Map",
+          "click": "map"
+        },
+        {
+          "icon": "fa fa-user",
+          "name": "Users",
+          "click": "users"
+        }
+      ]
+    }
+  },
+  "agent": {
+    "menu": {
+      "title": "Agent",
+      "items": [
+        {
+          "icon": "fa fa-thermometer-half fa-1x",
+          "name": "Analytics",
+          "click": "analytics"
+        },
+        {
+          "icon": "fa fa-qrcode",
+          "name": "Places",
+          "click": "places"
+        },
+        {
+          "icon": "fa fa-history",
+          "name": "History",
+          "click": "history"
+        }
+      ]
+    }
+  }
+}
