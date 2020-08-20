@@ -1,5 +1,5 @@
 import {Access} from "./access.class";
-import {Microservices} from '../../declarations/service';
+import {Microservices} from '../../declarations';
 import {UserModel} from '../../models/user.model';
 
 export = (access: Access): Microservices<UserModel> => ({

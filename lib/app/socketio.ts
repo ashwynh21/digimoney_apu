@@ -1,11 +1,12 @@
-import {Application} from './declarations/application';
-import {Client, SocketInterface} from './declarations/socket';
+import Ash from './declarations/application';
+import {Client, SocketInterface} from './declarations';
 
 import io from 'socket.io';
 import sockets from './sockets';
+import http from 'http';
 
-export default (app: Application): void => {
-    app.io = io(app.http, {serveClient: false});
+export default (app: Ash, server: http.Server): void => {
+    app.io = io(server, {serveClient: false});
 
     /*
     simple log for when the server kicks off.
@@ -25,7 +26,7 @@ export default (app: Application): void => {
 /*
 so now let us define the bootstrapping function that will recreate the socket with its new implementation below
  */
-function bootstrap(app: Application, socket: io.Socket): Client {
+function bootstrap(app: Ash, socket: io.Socket): Client {
     const client: Client = <Client>socket;
 
     /*

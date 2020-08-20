@@ -1,5 +1,5 @@
 
-import {Client} from '../declarations/socket';
+import {Client} from '../declarations';
 
 export default (client: Client): void => {
 }

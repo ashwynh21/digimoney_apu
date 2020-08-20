@@ -1,15 +1,19 @@
-import {Application} from "../../declarations";
-import {Service} from "../../declarations/service";
 
 import service from './refresh.service';
+import mongoose from 'mongoose';
 
-export default (app: Application): void => {
-    const refresh = new Service<{token: string}>(app,
+import Ash from '../../declarations/application';
+import Service from '../../declarations/service';
+
+export default (app: Ash): void => {
+    interface Token extends mongoose.Document {token: string}
+
+    const refresh = new Service<Token>(app,
         {
             name: 'refresh'
         }
     );
     refresh.addservices(service(app));
 
-    app.apply(refresh);
+    app.apply<Token>(refresh);
 }

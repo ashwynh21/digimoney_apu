@@ -1,15 +1,9 @@
 
 import {UserStore} from './user.store';
-import {Application} from '../declarations';
-import {StoreInterface} from '../declarations/store';
 
-export default (app: Application): void => {
-    const stores: Array<StoreInterface> = [];
+import {UserModel} from '../models/user.model';
+import Ash from '../declarations/application';
 
-    stores.push(new UserStore(app));
-
-
-    stores.forEach((store) => {
-        app.stores[store.name] = store;
-    });
+export default (app: Ash): void => {
+    app.commit<UserModel>(new UserStore(app));
 }

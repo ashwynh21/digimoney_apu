@@ -1,10 +1,10 @@
 
-import {Application} from "./declarations";
 import mongoose from 'mongoose';
+import Ash from './declarations/application';
 
-export = (app: Application): void => {
+export = (app: Ash): void => {
     mongoose.connect(
-        app.get('mongodb'),
+        app.configuration['mongodb'],
         {
             useCreateIndex: true,
             useNewUrlParser: true,
@@ -13,7 +13,7 @@ export = (app: Application): void => {
         }
     )
         .then((connection) => {
-            console.info(`mongoose connection established on ${app.get('mongodb')}`);
+            console.info(`mongoose connection established on ${app.configuration['mongodb']}`);
 
             return connection;
         })
@@ -25,5 +25,5 @@ export = (app: Application): void => {
 
     mongoose.Promise = global.Promise;
 
-    app.set('mongoose', mongoose);
+    app.configuration['mongoose'] = mongoose;
 };

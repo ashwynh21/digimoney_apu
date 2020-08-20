@@ -1,5 +1,4 @@
-import {Service} from "../../declarations/service";
-import {Application} from "../../declarations";
+
 import {User} from "../user/user.class";
 import {UserModel} from '../../models/user.model';
 
@@ -7,8 +6,11 @@ import jwt from "jsonwebtoken";
 import constants from '../../constants';
 import service from './access.service';
 
+import Ash from '../../declarations/application';
+import Service from '../../declarations/service';
+
 export class Access extends Service<UserModel> {
-    public constructor(app: Application) {
+    public constructor(app: Ash) {
         /*
         This service does not have a model or data store so we have to be careful with the constructor
          */
@@ -23,9 +25,9 @@ export class Access extends Service<UserModel> {
     }
 
     public access(data: UserModel): Promise<UserModel> {
-        if(!data.secret) throw Error(constants.strings.incorrect_credentials);
+        if(!data.password) throw Error(constants.strings.incorrect_credentials);
 
-        const settings = this.context.get('authorization');
+        const settings = this.context.configuration['authorization'];
 
         return (this.context.fetch(settings.entity) as User).authorize(data)
             .then((value) => {
@@ -45,8 +47,6 @@ export class Access extends Service<UserModel> {
                     what we could do is check if the payload of the access token has the mobile field written.
                     if it does not then the user is not to be considered in having a verified account.
                      */
-                    delete result.qrcode;
-                    delete result.image;
 
                     result.token = jwt.sign({
                         header: {
@@ -55,9 +55,9 @@ export class Access extends Service<UserModel> {
                         },
                         payload: result,
                         signature: {
-                            iss: 'info@' + this.context.get('host'),
-                            sub: 'info@' + this.context.get('host'),
-                            aud: this.context.get('host'),
+                            iss: 'info@' + this.context.configuration['host'],
+                            sub: 'info@' + this.context.configuration['host'],
+                            aud: this.context.configuration['host'],
                             iat: Date.now(),
                             exp: Date.now() + settings.expiration
                         }

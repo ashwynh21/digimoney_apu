@@ -1,9 +1,9 @@
-import {Application} from "../../declarations";
+import Ash from "../../declarations/application";
 
 import jwt, {TokenExpiredError} from 'jsonwebtoken';
-import {Microservices} from '../../declarations/service';
+import {Microservices} from '../../declarations';
 
-export = (app: Application): Microservices<{token: string}> => ({
+export = (app: Ash): Microservices<{token: string}> => ({
     '': {
         method: 'post',
         message: 'Hi, here is your new access token!',
@@ -14,7 +14,7 @@ export = (app: Application): Microservices<{token: string}> => ({
         user to get access tokens as well as refresh tokens.
          */
         callback: async (data : {token: string}) => {
-            const settings = app.get('authorization');
+            const settings = app.configuration['authorization'];
             const token = data?.token;
 
             if (!token) throw Error('Oops, token not found!');
@@ -42,9 +42,9 @@ export = (app: Application): Microservices<{token: string}> => ({
                                 {ignoreExpiration: true}) as unknown as Record<string, unknown>;
 
                         payload.signature = {
-                            iss: 'info@' + app.get('host'),
-                            sub: 'info@' + app.get('host'),
-                            aud: app.get('host'),
+                            iss: 'info@' + app.configuration['host'],
+                            sub: 'info@' + app.configuration['host'],
+                            aud: app.configuration['host'],
                             iat: Date.now(),
                             exp: Date.now() + settings.expiration
                         };

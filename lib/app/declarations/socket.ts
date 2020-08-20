@@ -6,9 +6,8 @@ So let us discuss how exactly we are going to layout the structure of the applic
 items, that is, the message name and the default responses.
  */
 
-import {Application} from './application';
-
 import io from 'socket.io';
+import Ash from './application';
 
 export default abstract class Socket<T> implements SocketInterface {
     /*
@@ -148,7 +147,7 @@ export interface Client extends io.Socket {
     with each other. It would be ideal to bootstrap the application to the socket then the service will not need
     to hold any context of its own and will instead refer to the client for the application context.
      */
-    context: Application;
+    context: Ash;
     /*
     this method will allow us to set a service to the socket.
      */

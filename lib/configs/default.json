@@ -15,10 +15,5 @@
     "limit": 2.592e6,
     "entity": "user",
     "route": "access"
-  },
-  "mailer": {
-    "email": "ashwynh21@gmail.com",
-    "username": "ashwynh21@gmail.com",
-    "password": "as28hw01yn95ho61rt00on"
   }
 }

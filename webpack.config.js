@@ -2,6 +2,8 @@ const path = require('path');
 const copy = require('copy-webpack-plugin');
 
 module.exports = {
+    mode: 'development',
+
     entry: './lib/public/index.ts',
     module: {
         rules: [

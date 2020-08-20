@@ -2,11 +2,11 @@ import Store from '../declarations/store';
 
 import mongoose from 'mongoose';
 
-import {Application} from '../declarations/application';
+import Ash from '../declarations/application';
 import {UserModel, UserSchema} from '../models/user.model';
 
 export class UserStore extends Store<UserModel> {
-    constructor(app: Application) {
+    constructor(app: Ash) {
         super(app, {
             name: 'user',
             storage: UserSchema
@@ -30,5 +30,4 @@ export class UserStore extends Store<UserModel> {
         * //TODO: implement onready()
         * */
     }
-
 }

@@ -1,13 +1,14 @@
-import {Service} from '../../declarations/service';
-import {UserModel, UserSchema} from '../../models/user.model';
-import {Application} from '../../declarations';
 
-import services from './user.service';
-import mongoose from "mongoose";
+import {UserModel} from '../../models/user.model';
 import {UserStore} from '../../store/user.store';
 
+import Ash from '../../declarations/application';
+import Service from '../../declarations/service';
+
+import services from './user.service';
+
 export class User extends Service<UserModel> {
-    constructor(context: Application) {
+    constructor(context: Ash) {
         super(context, {
             name: 'user',
             store: 'user',
@@ -17,13 +18,16 @@ export class User extends Service<UserModel> {
     }
 
     public authorize(data: UserModel): Promise<UserModel> {
-        if(!data.mobile) throw Error('Oops, mobile number is required!');
+        if(!data.username) throw Error('Oops, username is required!');
 
-        return (this.context.query('user') as UserStore).storage.findOne({mobile: data.mobile, secret: data.secret})
-                .then((value: mongoose.Document | null) => {
-                    if(!value) throw Error('Oops, mobile number or secret is incorrect!');
+        return (this.context.query('user') as UserStore).storage.findOne({
+            username: data.username,
+            password: data.password
+        })
+            .then((value: UserModel | null) => {
+                if(!value) throw Error('Oops, username or password is incorrect!');
 
-                    return value as unknown as UserModel;
-                });
+                return value;
+            });
     }
 }

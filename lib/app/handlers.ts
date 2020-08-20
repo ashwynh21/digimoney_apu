@@ -1,16 +1,16 @@
-import {Application} from "./declarations";
 import {Request, Response} from "express";
 
 import {Return} from './helpers/return';
 
 import constants from './constants';
+import Ash from './declarations/application';
 
-export = (app: Application): void => {
+export = (app: Ash): void => {
     /*
     Here we will be configuring handlers that will override the default handlers that are being expressed
     in express. The first express app route that we will be overriding is the 404 error.
      */
-    app.use((request: Request, response: Response) => {
+    app.http?.use((request: Request, response: Response) => {
         const result: Return<Record<string, unknown>> = {
             message: constants.strings.not_found_error,
             payload: request.body,
@@ -24,7 +24,7 @@ export = (app: Application): void => {
     now we need some way of checking when a request payload is too large and responding with the appropriate
     error.
      */
-    app.use((error: { type: string, message: string }, request: Request, response: Response, next: () => unknown) => {
+    app.http?.use((error: { type: string, message: string }, request: Request, response: Response, next: () => unknown) => {
         if(error.type === 'entity.too.large') {
             const result: Return<Record<string, unknown>> = {
                 message: constants.strings.too_large_error,

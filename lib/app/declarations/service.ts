@@ -1,13 +1,13 @@
-import { Application } from './application';
+
 import { Request, Response } from 'express';
 
-import mongoose from 'mongoose';
-
 import { Return } from '../helpers/return';
-import { Socket } from 'socket.io';
 import { Payload } from '../helpers/payload';
 
-export class Service<T> implements ServiceInterface {
+import mongoose from 'mongoose';
+import Ash from './application';
+
+export default class Service<T extends mongoose.Document> implements ServiceInterface {
     /*
     * We need to keep a separate reference to the storage system, hence we will need the base class that connects to the
     * data system*/
@@ -18,8 +18,9 @@ export class Service<T> implements ServiceInterface {
      */
     public hooks: ServiceHooks | undefined;
     public name: string;
+    public store: string | undefined;
 
-    public constructor(public context: Application, properties: {
+    public constructor(public context: Ash, options: {
         /*We name the service for referencing purposes...*/
         name: string,
 
@@ -29,18 +30,22 @@ export class Service<T> implements ServiceInterface {
         /*We then add the hooking system for crud functionality...*/
         hooks?: ServiceHooks,
     }) {
-        this.name = properties.name;
+        this.name = options.name;
 
         /*
         i would like to implement the sub service lightly by beginning here, since the name of the sub-service
         will have its parent attached we then need to reference the parent collection since they are sharing data
         stores.
          */
-        this.hooks = properties.hooks;
+        this.hooks = options.hooks;
 
-        this.before();
-        if(properties.store) this.crud();
-        this.after();
+        if(options.store) {
+            this.store = options.store;
+
+            this.before();
+            this.crud();
+            this.after();
+        }
     }
 
     addservices(services: Microservices<T>): void {
@@ -57,7 +62,7 @@ export class Service<T> implements ServiceInterface {
             type Callback = (data: T) => Promise<unknown>;
 
             const hooker = (callback: Callback, hook: 'before' | 'after') => {
-                Object(this.context)[value.method](`/${this.name}/${key}`,
+                Object(this.context.http)[value.method](`/${this.name}/${key}`,
                 (request: Request, response: Response, next: (data: unknown) => unknown) => {
                     const data = {...request.body, ...request.query} as T;
 
@@ -107,12 +112,12 @@ export class Service<T> implements ServiceInterface {
             callback function.
              */
             if(value.callback) {
-                Object(this.context)[value.method](`/${this.name}/${key}`,
+                Object(this.context.http)[value.method](`/${this.name}/${key}`,
                 (request: Request, response: Response, next: (data: unknown) => unknown) => {
                     const data = {...request.body, ...request.query} as T;
 
                     return Promise.resolve(value.callback(data))
-                        .then((result) => {
+                        .then((result: Payload<T>) => {
                             if(!value.hooks?.after)
                                 this.exit(response, result,
                                     {
@@ -167,10 +172,12 @@ export class Service<T> implements ServiceInterface {
         first set the callback function in the microservice interface as optional so that it does not
         override the CRUD function.
          */
-        this.context.post(`/${this.name}`,
+        const storage = this.context.query<T>(this.store as string);
+
+        this.context.http?.post(`/${this.name}`,
             (request: Request, response: Response) => {
                 const data = {...request.body, ...request.query} as T;
-                return this.create(data)
+                return storage.create(data)
                     .then((value: Payload<T>) => this.exit(response, value,
                         {
                             message: `Hi, an ${this.name} has been created!`,
@@ -182,14 +189,14 @@ export class Service<T> implements ServiceInterface {
                             message: `Oops, could not create ${this.name}!`,
                             status: 422,
                             debug: error.message,
-                        }
-                ))
+                        })
+                    )
             }
         );
-        this.context.get(`/${this.name}`,
+        this.context.http?.get(`/${this.name}`,
             (request: Request, response: Response) => {
                 const data = {...request.body, ...request.query} as T;
-                return this.read(data)
+                return storage.read(data)
                     .then((value: Payload<T>) => this.exit(response, value,
                         {
                             message: 'Hi, a data payload is provided!',
@@ -205,10 +212,10 @@ export class Service<T> implements ServiceInterface {
                     ))
             }
         );
-        this.context.put(`/${this.name}`,
+        this.context.http?.put(`/${this.name}`,
             (request: Request, response: Response) => {
                 const data = {...request.body, ...request.query} as T;
-                return this.update(data)
+                return storage.update(data)
                     .then((value: Payload<T>) => this.exit(response, value,
                         {
                             message: `Hi, an ${this.name} has been updated!`,
@@ -224,11 +231,11 @@ export class Service<T> implements ServiceInterface {
                     ))
             }
         );
-        this.context.delete(`/${this.name}`,
+        this.context.http?.delete(`/${this.name}`,
             (request: Request, response: Response) => {
                 const data = {...request.body, ...request.query} as T;
 
-                return this.delete(data)
+                return storage.delete(data)
                     .then((value: Payload<T>) => this.exit(response, value,
                         {
                             message: `Hi, an ${this.name} has been removed!`,
@@ -271,56 +278,6 @@ export class Service<T> implements ServiceInterface {
     /*
     below we define the crud functionality in their corresponding callbacks
      */
-    protected create(data: T): Promise<Payload<T>> {
-        return (new mongoose(data))
-                .save()
-                .then((value) => {
-                    return value.toObject() as T;
-                });
-    }
-    protected async read(data: T & { page?: number | string, size?: number | string }):
-            Promise<Payload<T | { page: unknown, length: number }>> {
-        if (typeof data.page !== 'number') data.page = Number(data.page);
-        if (typeof data.size !== 'number') data.size = Number(data.size);
-
-        /*
-        here we need to remap the data payload gotten from this request to allow
-         */
-
-        const query = {...data};
-        delete query.page;
-        delete query.size;
-
-        if(data.page > -1 && data.size > 0) {
-            return {
-                page: await mongoose
-                    .find(query)
-                    .skip(data.page * data.size)
-                    .limit(data.size) as unknown,
-                length: Math.floor(await mongoose.countDocuments(query))
-            };
-        }
-        return mongoose
-                .find(query);
-    }
-    protected update(data: T): Promise<Payload<T>> {
-        return mongoose
-                .updateOne({_id: (<unknown>data as {_id: string})._id}, {$set: data})
-                .then((value: mongoose.Document) => {
-                    if(!value) throw Error(`Oops, ${this.name} does not exist!`);
-
-                    return data;
-                });
-    }
-    protected delete(data: T): Promise<Payload<T>> {
-        return mongoose
-                .findOneAndRemove({_id: (<unknown>data as {_id: string})._id})
-                .then((value) => {
-                    if(!value) throw new Error(`Oops, could not remove ${this.name}`);
-
-                    return data;
-                });
-    }
 
     /*
     Now we finally work on the hooking system of the service which will function much to the middleware of the
@@ -471,15 +428,10 @@ export interface Subservice<T> {
 export interface Microservices<T> {
     [route: string]: Subservice<T>
 }
-export interface Sockets<T> {
-    [event: string]: {
-        callback: ((data: T, socket: Socket) => Promise<T>)
-    }
-}
 export interface ServiceInterface {
     hooks?: ServiceHooks;
     name: string;
-    context: Application;
+    context: Ash;
 }
 export interface ServiceHooks {
     before?: {

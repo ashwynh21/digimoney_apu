@@ -14,10 +14,10 @@ would be to either create a wrapper on the service that will enable authenticati
 authentication blocking on a service entirely and allowing finer blocking on a single request in a service.
  */
 
-import {Application} from "./declarations/application";
-
-import jwt, {TokenExpiredError} from "jsonwebtoken";
+import jwt, {TokenExpiredError} from 'jsonwebtoken';
 import constants from './constants';
+
+import Ash from './declarations/application';
 
 /*
 Here we describe the different authentication configurations that we can have with especial focus on the jwt
@@ -27,7 +27,7 @@ In the following objects we will describe the structure of the token and their p
 parts concerning the composition of the access token and refresh token.
  */
 
-export = (app: Application): void => {
+export default (app: Ash): void => {
     /*
     Now with the settings obtained we can then decide what strategy to follow. With that said let us make the
     configurations required for the basic authentication to work.
@@ -44,7 +44,7 @@ export = (app: Application): void => {
     create authentication requests but we can simply configure the function so that it exists in the context
     and is accessible throughout the application.
      */
-    const authentication = (data: {token?: string}): Promise<Record<string, unknown>> => {
+    app.configuration['authentication'] = (data: { token?: string }): Promise<Record<string, unknown>> => {
         /*
         Let us make some considerations
 
@@ -52,10 +52,10 @@ export = (app: Application): void => {
         may not be able to authenticate since they will not be instantiating the service that contains the
         authentication function required here.
          */
-        const settings = app.get('authorization');
+        const settings = app.configuration['authorization'];
         const token = data?.token;
 
-        if(!token) throw Error(constants.strings.not_found_token);
+        if (!token) throw Error(constants.strings.not_found_token);
 
         /*
         declaring token payload here
@@ -66,14 +66,12 @@ export = (app: Application): void => {
             /*
             the authentication here should be lenient if the token is valid but expired
              */
-            if(error instanceof TokenExpiredError) {
+            if (error instanceof TokenExpiredError) {
                 return Promise
-                    .resolve(jwt.verify(token, settings.secret, {ignoreExpiration: true}) as Record<string, unknown>);
+                        .resolve(jwt.verify(token, settings.secret, {ignoreExpiration: true}) as Record<string, unknown>);
             }
 
             throw error;
         }
     };
-
-    app.set('authentication', authentication);
 }
