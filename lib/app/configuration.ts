@@ -1,4 +1,4 @@
-import Ash from "./declarations/application";
+import Ash from './declarations/application';
 
 import configuration from '../configs/default.json';
 

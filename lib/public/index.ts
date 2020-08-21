@@ -3,7 +3,7 @@ import socketio from '../app/socketio';
 import http from 'http';
 import config from '../../package.json';
 
-process.title = config.name
+process.title = config.name;
 
 const port = process.env.PORT || app.configuration['port'];
 

@@ -21,7 +21,7 @@ export default (app: Ash, server: http.Server): void => {
     essentially the bridging connection between the client and the rest of the services in the application.
      */
     app.io.on('connection', (socket) => sockets(bootstrap(app, socket)));
-}
+};
 
 /*
 so now let us define the bootstrapping function that will recreate the socket with its new implementation below

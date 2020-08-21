@@ -1,6 +1,6 @@
-import { Express } from 'express';
+import {Express} from 'express';
 import Service, {ServiceInterface} from './service';
-import Store, { StoreInterface } from './store';
+import Store, {StoreInterface} from './store';
 
 import io from 'socket.io';
 import mongoose from 'mongoose';
@@ -16,36 +16,37 @@ export default class Ash implements Application {
     http: Express | undefined;
     io: io.Server | undefined;
 
-    private services: {[name: string]: ServiceInterface} = {};
-    private stores: {[name: string]: StoreInterface} = {};
-    public configuration: {[name: string]: any} = {};
+    private services: { [name: string]: ServiceInterface } = {};
+    private stores: { [name: string]: StoreInterface } = {};
+    public configuration: { [name: string]: any } = {};
 
     constructor() {
         /*
-        * Lets start by instantiating an express app...*/
+		* Lets start by instantiating an express app...*/
         this.http = express()
             /*
-            lets also make sure that we handle to input maximum size to prevent payload too large errors
-             */
+			lets also make sure that we handle to input maximum size to prevent payload too large errors
+			 */
             .use(express.json({limit: '512kb'}))
             .use(express.urlencoded({limit: '512kb', extended: true}))
             .use(multer().any())
             /*
-            we have to start by settings cors allow cross origin to all first
-             */
+			we have to start by settings cors allow cross origin to all first
+			 */
             .use(cors())
             /*
-            enable security, CORS, compression, favicon and body parsing
-             */
+			enable security, CORS, compression, favicon and body parsing
+			 */
             .use(helmet())
             .use(compress());
     }
 
     public apply<T extends mongoose.Document>(service: Service<T>): Service<T> {
         (this.services)[service.name] = service;
-
+        
         return service;
     }
+
     public commit<T extends mongoose.Document>(store: Store<T>): Store<T> {
         this.stores[store.name] = store;
         return store;
@@ -54,6 +55,7 @@ export default class Ash implements Application {
     public fetch<T extends mongoose.Document>(service: string): Service<T> {
         return this.services[service] as Service<T>;
     }
+
     public query<T extends mongoose.Document>(store: string): Store<T> {
         return this.stores[store] as Store<T>;
     }
@@ -66,9 +68,10 @@ export default class Ash implements Application {
     public authenticate(data: { token: string }): Promise<Record<string, unknown>> {
         /*
         * Lets first make sure that the function is defined properly*/
-        if(!this.configuration['authentication']) throw Error('Oops, authentication callback is undefined!');
-
-        return (this.configuration['authentication'] as (data: {token?: string}) => Promise<Record<string, unknown>>)(data);
+        if (!this.configuration['authentication']) throw Error('Oops, authentication callback is undefined!');
+        
+        return (this.configuration['authentication'] as (data: { token?: string }) =>
+            Promise<Record<string, unknown>>)(data);
     }
 }
 
@@ -81,7 +84,7 @@ interface Application {
     commit: <T extends mongoose.Document>(store: Store<T>) => Store<T>;
     query: <T extends mongoose.Document>(store: string) => Store<T>;
 
-    authenticate: (data: {token: string}) => Promise<Record<string, unknown>>;
+    authenticate: (data: { token: string }) => Promise<Record<string, unknown>>;
 
     io?: io.Server;
     http?: Express;

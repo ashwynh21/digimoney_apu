@@ -44,6 +44,6 @@ const app = (new Ash())
     in the call back declarations defined here. this will create an awkward dependency
     which we will have to figure out in the future.
      */
-    .configure(handlers)
+    .configure(handlers);
 
 export default app;

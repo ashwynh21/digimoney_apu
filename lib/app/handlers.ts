@@ -1,4 +1,4 @@
-import {Request, Response} from "express";
+import {Request, Response} from 'express';
 
 import {Return} from './helpers/return';
 
@@ -24,8 +24,9 @@ export = (app: Ash): void => {
     now we need some way of checking when a request payload is too large and responding with the appropriate
     error.
      */
-    app.http?.use((error: { type: string, message: string }, request: Request, response: Response, next: () => unknown) => {
-        if(error.type === 'entity.too.large') {
+    app.http?.use((error: { type: string, message: string },
+        request: Request, response: Response, next: () => unknown) => {
+        if (error.type==='entity.too.large') {
             const result: Return<Record<string, unknown>> = {
                 message: constants.strings.too_large_error,
                 payload: request.body,

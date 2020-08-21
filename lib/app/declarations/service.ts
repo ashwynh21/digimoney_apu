@@ -1,8 +1,7 @@
+import {Request, Response} from 'express';
 
-import { Request, Response } from 'express';
-
-import { Return } from '../helpers/return';
-import { Payload } from '../helpers/payload';
+import {Return} from '../helpers/return';
+import {Payload} from '../helpers/payload';
 
 import mongoose from 'mongoose';
 import Ash from './application';
@@ -39,7 +38,7 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
          */
         this.hooks = options.hooks;
 
-        if(options.store) {
+        if (options.store) {
             this.store = options.store;
 
             this.before();
@@ -63,41 +62,41 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
 
             const hooker = (callback: Callback, hook: 'before' | 'after') => {
                 Object(this.context.http)[value.method](`/${this.name}/${key}`,
-                (request: Request, response: Response, next: (data: unknown) => unknown) => {
-                    const data = {...request.body, ...request.query} as T;
+                    (request: Request, response: Response, next: (data: unknown) => unknown) => {
+                        const data = {...request.body, ...request.query} as T;
 
-                    return callback(data)
-                        .then((result) => {
-                            /*
+                        return callback(data)
+                            .then((result) => {
+                                /*
                             Currently we make the value returned from the hook remain functional in the hook so
                             that the hook is independent of its action to the service.
                              */
-                            if(hook == 'before') {
-                                next(result);
-                            } else {
-                                if((value.hooks?.after as Array<Callback>).indexOf(callback)
-                                        === (value.hooks?.after as Array<Callback>).length - 1) {
-                                    this.exit(response, result as Payload<T>,
-                                        {
-                                            message: value.message,
-                                            status: 200,
-                                        }
-                                    )
-                                } else {
+                                if (hook=='before') {
                                     next(result);
+                                } else {
+                                    if ((value.hooks?.after as Array<Callback>).indexOf(callback)
+                                        ===(value.hooks?.after as Array<Callback>).length - 1) {
+                                        this.exit(response, result as Payload<T>,
+                                            {
+                                                message: value.message,
+                                                status: 200,
+                                            }
+                                        );
+                                    } else {
+                                        next(result);
+                                    }
                                 }
-                            }
-                        })
-                        .catch((error: Error) => {
-                            this.exit(response, data,
-                                {
-                                    message: value.error,
-                                    status: 422,
-                                    debug: error.message,
-                                }
-                            )
-                        });
-                })
+                            })
+                            .catch((error: Error) => {
+                                this.exit(response, data,
+                                    {
+                                        message: value.error,
+                                        status: 422,
+                                        debug: error.message,
+                                    }
+                                );
+                            });
+                    });
             };
             /*
             Considering the middleware or hooks of each service we need to attach appropriately to the context
@@ -111,33 +110,33 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
             get the object of the key using the key then we have access to the call method as well as the
             callback function.
              */
-            if(value.callback) {
+            if (value.callback) {
                 Object(this.context.http)[value.method](`/${this.name}/${key}`,
-                (request: Request, response: Response, next: (data: unknown) => unknown) => {
-                    const data = {...request.body, ...request.query} as T;
+                    (request: Request, response: Response, next: (data: unknown) => unknown) => {
+                        const data = {...request.body, ...request.query} as T;
 
-                    return Promise.resolve(value.callback(data))
-                        .then((result: Payload<T>) => {
-                            if(!value.hooks?.after)
-                                this.exit(response, result,
+                        return Promise.resolve(value.callback(data))
+                            .then((result: Payload<T>) => {
+                                if (!value.hooks?.after)
+                                    this.exit(response, result,
+                                        {
+                                            message: value.message,
+                                            status: 200,
+                                        }
+                                    );
+                                else
+                                    next(result);
+                            })
+                            .catch((error: Error) => {
+                                this.exit(response, data,
                                     {
-                                        message: value.message,
-                                        status: 200,
+                                        message: value.error,
+                                        status: 422,
+                                        debug: error.message,
                                     }
                                 );
-                            else
-                                next(result);
-                        })
-                        .catch((error: Error) => {
-                            this.exit(response, data,
-                                {
-                                    message: value.error,
-                                    status: 422,
-                                    debug: error.message,
-                                }
-                            )
-                        });
-                });
+                            });
+                    });
             }
 
             /*
@@ -190,7 +189,7 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
                             status: 422,
                             debug: error.message,
                         })
-                    )
+                    );
             }
         );
         this.context.http?.get(`/${this.name}`,
@@ -209,7 +208,7 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
                             status: 404,
                             debug: error.message,
                         }
-                    ))
+                    ));
             }
         );
         this.context.http?.put(`/${this.name}`,
@@ -228,7 +227,7 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
                             status: 413,
                             debug: error.message,
                         }
-                    ))
+                    ));
             }
         );
         this.context.http?.delete(`/${this.name}`,
@@ -248,7 +247,7 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
                             status: 422,
                             debug: error.message,
                         }
-                    ))
+                    ));
             }
         );
         /*
@@ -262,7 +261,7 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
     /*
     We then define a function to filter the request object using the model interface provided in the constructor
      */
-    private exit(response: Response, value: Payload<T>, options: Return<T> & {status: number} = {
+    private exit(response: Response, value: Payload<T>, options: Return<T> & { status: number } = {
         message: 'Hey, request success!',
         status: 200,
     }) {
@@ -289,15 +288,17 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
     we see that there are two sets of hooks that need to be dealt with.
      */
     private before() {
-        const hooks = this.hooks?.before ? this.hooks?.before : {};
+        const hooks = this.hooks?.before ? this.hooks?.before:{};
 
         this.hooker(hooks);
     }
+
     private after() {
-        const hooks = this.hooks?.after ? this.hooks?.after : {};
+        const hooks = this.hooks?.after ? this.hooks?.after:{};
 
         this.hooker(hooks);
     }
+
     private hooker(hooks: {
         post?: ((data: unknown) => unknown)[],
         put?: ((data: unknown) => unknown)[],
@@ -308,7 +309,7 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
             /*
             Here we will get a max of four iterations in which the key call has an array of callbacks
              */
-            if(!value) return;
+            if (!value) return;
             else {
                 value.forEach((callback) => {
                     return Object(this.context)[key.toString()](`/${this.name}`,
@@ -325,7 +326,7 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
                                         {
                                             status: 201,
                                         }
-                                    )
+                                    );
                                 })
                                 .catch((error: Error) => {
                                     this.exit(response, data,
@@ -334,7 +335,7 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
                                             status: 422,
                                             debug: error.message,
                                         }
-                                    )
+                                    );
                                 });
                         },
                     );
@@ -347,16 +348,16 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
     We can shift the authentication code to its own function so its more reusable.
      */
     private authenticate(service: Subservice<T>, key: string) {
-        if(service.authenticate) {
+        if (service.authenticate) {
             Object(this.context)[service.method](`/${this.name}/${key}`,
                 (request: Request, response: Response, next: (data?: unknown) => unknown) => {
-                    const data: T & {token: string} = {...request.body, ...request.query};
+                    const data: T & { token: string } = {...request.body, ...request.query};
                     /*
                     This is where the authentication method will go.
                      */
                     return Promise.resolve(this.context.authenticate(data))
                         .then((value) => {
-                            if(!value) throw Error('Oops, authentication error occurred!');
+                            if (!value) throw Error('Oops, authentication error occurred!');
 
                             next();
                         })
@@ -367,7 +368,7 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
                                     debug: error.message,
                                     status: 412
                                 }
-                            )
+                            );
                         });
                 });
         }
@@ -425,14 +426,17 @@ export interface Subservice<T> {
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     callback: (data: T | any) => Promise<Payload<T | any>>
 }
+
 export interface Microservices<T> {
     [route: string]: Subservice<T>
 }
+
 export interface ServiceInterface {
     hooks?: ServiceHooks;
     name: string;
     context: Ash;
 }
+
 export interface ServiceHooks {
     before?: {
         post?: ((data: unknown) => unknown)[],

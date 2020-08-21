@@ -1,4 +1,4 @@
-import {Access} from "./access.class";
+import {Access} from './access.class';
 import {Microservices} from '../../declarations';
 import {UserModel} from '../../models/user.model';
 

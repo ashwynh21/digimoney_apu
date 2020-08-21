@@ -1,8 +1,8 @@
 
-import {User} from "../user/user.class";
+import {User} from '../user/user.class';
 import {UserModel} from '../../models/user.model';
 
-import jwt from "jsonwebtoken";
+import jwt from 'jsonwebtoken';
 import constants from '../../constants';
 import service from './access.service';
 

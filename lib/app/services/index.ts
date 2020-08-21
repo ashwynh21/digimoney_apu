@@ -10,4 +10,4 @@ import refresh from './refresh';
 
 export default (app: Ash): void => {
     app.configure(user);
-}
+};

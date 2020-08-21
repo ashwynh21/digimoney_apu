@@ -68,10 +68,10 @@ export default (app: Ash): void => {
              */
             if (error instanceof TokenExpiredError) {
                 return Promise
-                        .resolve(jwt.verify(token, settings.secret, {ignoreExpiration: true}) as Record<string, unknown>);
+                    .resolve(jwt.verify(token, settings.secret, {ignoreExpiration: true}) as Record<string, unknown>);
             }
 
             throw error;
         }
     };
-}
+};

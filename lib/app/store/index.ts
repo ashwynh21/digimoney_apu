@@ -6,4 +6,4 @@ import Ash from '../declarations/application';
 
 export default (app: Ash): void => {
     app.commit<UserModel>(new UserStore(app));
-}
+};

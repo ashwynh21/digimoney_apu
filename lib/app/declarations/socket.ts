@@ -32,6 +32,7 @@ export default abstract class Socket<T> implements SocketInterface {
     connection. this way we can have a dynamic set of message events that work with the application.
      */
     public readonly name: string;
+
     /*
     Another consideration to make is that when a user connects that connection is represented by as socket, so then
     if we bind or bootstrap the socket with the services needed then we should be able to add any functionality that is
@@ -43,6 +44,35 @@ export default abstract class Socket<T> implements SocketInterface {
         this.name = options.name;
 
         this.initialize();
+    }
+
+    /*
+    The first hook that we will be adding is an oncreate hook that will have the socket object in it.
+     */
+    protected async abstract onready(): Promise<void>;
+
+    /*
+    Let us create a function that will allow us to easily emit events using the client object
+     */
+    protected emit(name: string, message: SocketMessage): boolean {
+        return this.client.emit(`${this.name}/${name}`, message);
+    }
+
+    /*
+    Let us create another function that will allow us to bind in the configuration of the events property to the socket
+    events list.
+     */
+    protected bind(events: { [name: string]: SocketEvent }): void {
+        /*
+        so here we need to loop through the events interface to allow the functions to be configured to the event.
+         */
+        Object.entries(events).forEach(([name, event]) => {
+            /*
+            so with each event we must then bind the function call to the socket and use the name of the event as the
+            corresponding event name in the socket connection
+             */
+            this.client.on(`${this.name}/${name}`, event.callback);
+        });
     }
 
     /*
@@ -84,34 +114,6 @@ export default abstract class Socket<T> implements SocketInterface {
         after all the events are bound we are going to need a hook to represent that the service is ready. We will call
         it onready.
          */
-    }
-
-    /*
-    The first hook that we will be adding is an oncreate hook that will have the socket object in it.
-     */
-    protected async abstract onready(): Promise<void>;
-
-    /*
-    Let us create a function that will allow us to easily emit events using the client object
-     */
-    protected emit(name: string, message: SocketMessage): boolean {
-        return this.client.emit(`${this.name}/${name}`, message);
-    }
-    /*
-    Let us create another function that will allow us to bind in the configuration of the events property to the socket
-    events list.
-     */
-    protected bind(events: {[name: string]: SocketEvent}): void {
-        /*
-        so here we need to loop through the events interface to allow the functions to be configured to the event.
-         */
-        Object.entries(events).forEach(([name, event]) => {
-            /*
-            so with each event we must then bind the function call to the socket and use the name of the event as the
-            corresponding event name in the socket connection
-             */
-            this.client.on(`${this.name}/${name}`, event.callback);
-        });
     }
 }
 
@@ -160,7 +162,7 @@ export interface Client extends io.Socket {
     /*
     so we are going to need a place to store these services since there are no properties that we can reuse
      */
-    services: {[name: string]: SocketInterface}
+    services: { [name: string]: SocketInterface }
 
     /*
     let use create a property to hold the meta data provided on connection to the socket server

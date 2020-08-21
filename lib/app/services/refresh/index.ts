@@ -1,4 +1,3 @@
-
 import service from './refresh.service';
 import mongoose from 'mongoose';
 
@@ -6,7 +5,9 @@ import Ash from '../../declarations/application';
 import Service from '../../declarations/service';
 
 export default (app: Ash): void => {
-    interface Token extends mongoose.Document {token: string}
+    interface Token extends mongoose.Document {
+        token: string
+    }
 
     const refresh = new Service<Token>(app,
         {
@@ -16,4 +17,4 @@ export default (app: Ash): void => {
     refresh.addservices(service(app));
 
     app.apply<Token>(refresh);
-}
+};

@@ -9,7 +9,7 @@
     "assets": "copyfiles -u 1 'lib/assets' build/assets",
     "start": "node build/index.js",
     "start:dev": "nodemon",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint --fix --ext .ts ."
   },
   "keywords": [],
   "author": "",
