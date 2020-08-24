@@ -1,0 +1,15 @@
+{
+  "host": "localhost",
+  "port": 4000,
+  "public": "../public/",
+  "mongodb": "localhost",
+  "authorization": {
+    "strategy": "jwt",
+    "secret": "mysecret",
+    "refresh": "mysecret",
+    "expiration": 300,
+    "limit": 2.592e6,
+    "entity": "user",
+    "route": "access"
+  }
+}

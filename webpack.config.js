@@ -1,17 +1,17 @@
 const path = require('path');
-const copy = require('copy-webpack-plugin');
 
 module.exports = {
     mode: 'development',
 
-    entry: './lib/public/index.ts',
+    entry: {
+        index: './lib/public/index.ts'
+    },
+
     module: {
         rules: [
             {
                 test: /\.tsx?$/,
-                use: [
-                    'ts-loader',
-                ],
+                use: ['ts-loader'],
                 exclude: /node_modules/,
             },
             {
@@ -25,8 +25,33 @@ module.exports = {
     resolve: {
         extensions: [ '.tsx', '.ts', '.js' ],
     },
+
     output: {
-        filename: 'index.js',
+        filename: '[name].bundle.js',
+        chunkFilename: '[name].bundle.js',
         path: path.resolve(__dirname, 'build')
     },
+
+    optimization: {
+        splitChunks: {
+            chunks: 'async',
+            minSize: 20000,
+            maxSize: 0,
+            minChunks: 1,
+            maxAsyncRequests: 30,
+            maxInitialRequests: 30,
+            automaticNameDelimiter: '~',
+            cacheGroups: {
+                defaultVendors: {
+                    test: /[\\/]node_modules[\\/]/,
+                    priority: -10
+                },
+                default: {
+                    minChunks: 2,
+                    priority: -20,
+                    reuseExistingChunk: true
+                }
+            }
+        }
+    }
 };

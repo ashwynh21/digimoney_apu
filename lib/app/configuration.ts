@@ -1,12 +1,11 @@
 import Ash from './declarations/application';
 
-import configuration from '../configs/default.json';
+import configuration from '../configs/ash.json';
 
 export default (app: Ash): void => {
     app.configuration['mongodb'] = configuration.mongodb;
     app.configuration['host'] = configuration.host;
     app.configuration['port'] = configuration.port;
-    app.configuration['assets'] = configuration.assets;
     app.configuration['public'] = configuration.public;
     /*
     The authentication configuration settings defines the strategy that will be followed when creating the

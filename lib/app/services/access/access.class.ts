@@ -47,7 +47,6 @@ export class Access extends Service<UserModel> {
                     what we could do is check if the payload of the access token has the mobile field written.
                     if it does not then the user is not to be considered in having a verified account.
                      */
-
                     result.token = jwt.sign({
                         header: {
                             alg: 'HS256',
