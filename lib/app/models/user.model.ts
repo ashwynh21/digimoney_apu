@@ -1,13 +1,12 @@
-import mongoose from 'mongoose';
+import { Document, Schema } from 'mongoose';
 
-export interface UserModel extends mongoose.Document {
-    _id: mongoose.Types.ObjectId | string,
+export interface UserModel extends Document {
     username: string,
     password: string,
     updated: Date,
 }
 
-export const UserSchema = new mongoose.Schema<UserModel>({
+export const UserSchema = new Schema<UserModel>({
     username: {
         type: String,
         unique: true
@@ -18,9 +17,5 @@ export const UserSchema = new mongoose.Schema<UserModel>({
     updated: {
         type: Date,
         default: new Date()
-    },
-    __v: {
-        type: Number,
-        select: false
-    },
+    }
 }, {collection: 'user'});

@@ -54,7 +54,7 @@ export default abstract class Socket<T> implements SocketInterface {
     /*
     Let us create a function that will allow us to easily emit events using the client object
      */
-    protected emit(name: string, message: SocketMessage): boolean {
+    protected emit(name: string, message: Message): boolean {
         return this.client.emit(`${this.name}/${name}`, message);
     }
 
@@ -122,7 +122,7 @@ export interface SocketInterface {
 }
 
 export interface SocketEvent {
-    callback: (message: SocketMessage) => unknown | Promise<unknown>
+    callback: (message: Message) => unknown | Promise<unknown>
 }
 
 interface Options {
@@ -132,7 +132,7 @@ interface Options {
      */
 }
 
-export interface SocketMessage {
+export interface Message {
     data: unknown,
 
     debug?: unknown,

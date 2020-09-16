@@ -17,6 +17,8 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
      */
     public hooks: ServiceHooks | undefined;
     public name: string;
+    /*
+    * Here we keep a reference to the storage object*/
     public store: string | undefined;
 
     public constructor(public context: Ash, options: {
@@ -46,6 +48,14 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
             this.after();
         }
     }
+
+    /*
+    * down here we should keep a function that will allow us to get the
+    * related or corresponding storage object of the service class...
+    *
+    * this is something still worth considering to prevent too much coupling
+    * between the classes...
+    * */
 
     addservices(services: Microservices<T>): void {
         Object.entries(services).forEach(([key, value]) => {

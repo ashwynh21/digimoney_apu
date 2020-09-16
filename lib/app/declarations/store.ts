@@ -4,7 +4,7 @@ Here we are going to create a store object that will be used as the interface to
 We are going to connect with mongo db...
  */
 
-import * as mongoose from 'mongoose';
+import mongoose from 'mongoose';
 import {Payload} from '../helpers/payload';
 import Ash from './application';
 

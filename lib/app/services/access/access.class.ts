@@ -1,5 +1,5 @@
 
-import {User} from '../user/user.class';
+import {UserService} from '../user/user.class';
 import {UserModel} from '../../models/user.model';
 
 import jwt from 'jsonwebtoken';
@@ -9,7 +9,7 @@ import service from './access.service';
 import Ash from '../../declarations/application';
 import Service from '../../declarations/service';
 
-export class Access extends Service<UserModel> {
+export class AccessService extends Service<UserModel> {
     public constructor(app: Ash) {
         /*
         This service does not have a model or data store so we have to be careful with the constructor
@@ -29,7 +29,7 @@ export class Access extends Service<UserModel> {
 
         const settings = this.context.configuration['authorization'];
 
-        return (this.context.fetch(settings.entity) as User).authorize(data)
+        return (this.context.fetch(settings.entity) as UserService).authorize(data)
             .then((value) => {
                 if(value) {
                     const result = ({...value} as unknown as {_doc: UserModel & {token: string}})._doc;

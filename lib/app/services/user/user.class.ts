@@ -7,7 +7,7 @@ import Service from '../../declarations/service';
 
 import services from './user.service';
 
-export class User extends Service<UserModel> {
+export class UserService extends Service<UserModel> {
     constructor(context: Ash) {
         super(context, {
             name: 'user',
