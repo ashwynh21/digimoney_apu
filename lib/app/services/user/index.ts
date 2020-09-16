@@ -1,6 +1,5 @@
-
 import { UserService } from './user.class';
-import {UserModel} from '../../models/user.model';
+import { UserModel } from '../../models/user.model';
 
 import Ash from '../../declarations/application';
 

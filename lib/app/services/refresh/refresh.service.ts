@@ -1,7 +1,7 @@
 import Ash from '../../declarations/application';
 
-import jwt, {TokenExpiredError} from 'jsonwebtoken';
-import {Microservices} from '../../declarations';
+import jwt, { TokenExpiredError } from 'jsonwebtoken';
+import { Microservices } from '../../declarations';
 
 export = (app: Ash): Microservices<{ token: string }> => ({
     '': {
@@ -29,24 +29,23 @@ export = (app: Ash): Microservices<{ token: string }> => ({
                 return data;
             } catch (error) {
                 if (error instanceof TokenExpiredError) {
-                    if ((time.getTime() - error.expiredAt.getTime()) / 1000 > settings.limit)
-                        throw error;
+                    if ((time.getTime() - error.expiredAt.getTime()) / 1000 > settings.limit) throw error;
                     else {
                         /*
                         so here we expect the payload to have some of the user information, including the user _id.
                         since we will also be sending the user firebase token for update we will need to make sure
                         that we check for it and run an update using the user service.
                          */
-                        const payload: Record<string, unknown>
-                            = jwt.verify(token, settings.secret,
-                                {ignoreExpiration: true}) as unknown as Record<string, unknown>;
+                        const payload: Record<string, unknown> = (jwt.verify(token, settings.secret, {
+                            ignoreExpiration: true,
+                        }) as unknown) as Record<string, unknown>;
 
                         payload.signature = {
                             iss: 'info@' + app.configuration['host'],
                             sub: 'info@' + app.configuration['host'],
                             aud: app.configuration['host'],
                             iat: Date.now(),
-                            exp: Date.now() + settings.expiration
+                            exp: Date.now() + settings.expiration,
                         };
                         payload.header = {
                             alg: 'HS256',
@@ -56,14 +55,13 @@ export = (app: Ash): Microservices<{ token: string }> => ({
                         return {
                             token: jwt.sign(payload, settings.secret, {
                                 algorithm: 'HS256',
-                            })
+                            }),
                         };
                     }
                 } else {
                     throw error;
                 }
             }
-
-        }
-    }
-})
+        },
+    },
+});

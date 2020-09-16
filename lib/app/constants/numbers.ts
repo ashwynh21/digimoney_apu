@@ -1,4 +1,3 @@
-
 export = {
     password_lower_limit: 7,
 

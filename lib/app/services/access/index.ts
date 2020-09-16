@@ -1,5 +1,4 @@
-
-import {AccessService} from './access.class';
+import { AccessService } from './access.class';
 import Ash from '../../declarations/application';
 
 export default (app: Ash): void => {

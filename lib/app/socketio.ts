@@ -1,12 +1,12 @@
 import Ash from './declarations/application';
-import {Client, SocketInterface} from './declarations';
+import { Client, SocketInterface } from './declarations';
 
 import io from 'socket.io';
 import sockets from './sockets';
 import http from 'http';
 
 export default (app: Ash, server: http.Server): void => {
-    app.io = io(server, {serveClient: false});
+    app.io = io(server, { serveClient: false });
 
     /*
     simple log for when the server kicks off.

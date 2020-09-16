@@ -1,4 +1,4 @@
-import {Payload} from './payload';
+import { Payload } from './payload';
 
 export interface Return<T> {
     message?: string;

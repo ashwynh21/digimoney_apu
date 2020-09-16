@@ -3,7 +3,6 @@ import Ash from './declarations/application';
 import configuration from '../configs/ash.json';
 
 export default (app: Ash): void => {
-
     app.configuration['mongodb'] = configuration.mongodb;
     app.configuration['host'] = configuration.host;
     app.configuration['port'] = configuration.port;
@@ -18,5 +17,4 @@ export default (app: Ash): void => {
      */
 
     app.configuration['authorization'] = configuration?.authorization;
-
 };

@@ -6,14 +6,12 @@ import Service from '../../declarations/service';
 
 export default (app: Ash): void => {
     interface Token extends mongoose.Document {
-        token: string
+        token: string;
     }
 
-    const refresh = new Service<Token>(app,
-        {
-            name: 'refresh'
-        }
-    );
+    const refresh = new Service<Token>(app, {
+        name: 'refresh',
+    });
     refresh.addservices(service(app));
 
     app.apply<Token>(refresh);

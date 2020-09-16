@@ -14,7 +14,7 @@ would be to either create a wrapper on the service that will enable authenticati
 authentication blocking on a service entirely and allowing finer blocking on a single request in a service.
  */
 
-import jwt, {TokenExpiredError} from 'jsonwebtoken';
+import jwt, { TokenExpiredError } from 'jsonwebtoken';
 import constants from './constants';
 
 import Ash from './declarations/application';
@@ -67,8 +67,9 @@ export default (app: Ash): void => {
             the authentication here should be lenient if the token is valid but expired
              */
             if (error instanceof TokenExpiredError) {
-                return Promise
-                    .resolve(jwt.verify(token, settings.secret, {ignoreExpiration: true}) as Record<string, unknown>);
+                return Promise.resolve(
+                    jwt.verify(token, settings.secret, { ignoreExpiration: true }) as Record<string, unknown>,
+                );
             }
 
             throw error;

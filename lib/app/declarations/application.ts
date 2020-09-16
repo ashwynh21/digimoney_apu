@@ -1,6 +1,6 @@
-import {Express} from 'express';
-import Service, {ServiceInterface} from './service';
-import Store, {StoreInterface} from './store';
+import { Express } from 'express';
+import Service, { ServiceInterface } from './service';
+import Store, { StoreInterface } from './store';
 
 import io from 'socket.io';
 import mongoose from 'mongoose';
@@ -22,13 +22,13 @@ export default class Ash implements Application {
 
     constructor() {
         /*
-		* Lets start by instantiating an express app...*/
+         * Lets start by instantiating an express app...*/
         this.http = express()
             /*
 			lets also make sure that we handle to input maximum size to prevent payload too large errors
 			 */
-            .use(express.json({limit: '512kb'}))
-            .use(express.urlencoded({limit: '512kb', extended: true}))
+            .use(express.json({ limit: '512kb' }))
+            .use(express.urlencoded({ limit: '512kb', extended: true }))
             .use(multer().any())
             /*
 			we have to start by settings cors allow cross origin to all first
@@ -42,8 +42,8 @@ export default class Ash implements Application {
     }
 
     public apply<T extends mongoose.Document>(service: Service<T>): Service<T> {
-        (this.services)[service.name] = service;
-        
+        this.services[service.name] = service;
+
         return service;
     }
 
@@ -67,11 +67,12 @@ export default class Ash implements Application {
 
     public authenticate(data: { token: string }): Promise<Record<string, unknown>> {
         /*
-        * Lets first make sure that the function is defined properly*/
+         * Lets first make sure that the function is defined properly*/
         if (!this.configuration['authentication']) throw Error('Oops, authentication callback is undefined!');
-        
-        return (this.configuration['authentication'] as (data: { token?: string }) =>
-            Promise<Record<string, unknown>>)(data);
+
+        return (this.configuration['authentication'] as (data: { token?: string }) => Promise<Record<string, unknown>>)(
+            data,
+        );
     }
 }
 

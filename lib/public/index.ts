@@ -13,13 +13,10 @@ Somewhere here we need to add the code that will handle unknown responses or 404
 framework we will provide the response in a json format. Additionally to overriding the functionality of not
 found responses we will also have to provide a way of interfacing the response in the upper layers of the frame.
  */
-process.on('unhandledRejection', (reason, p) =>
-    console.error('unhandled rejection at: promise ', p, reason));
+process.on('unhandledRejection', (reason, p) => console.error('unhandled rejection at: promise ', p, reason));
 
-server.on('listening', () =>
-    console.info('application started on http://%s:%d', app.configuration['host'], port));
+server.on('listening', () => console.info('application started on http://%s:%d', app.configuration['host'], port));
 
-app
-    .configure((app) => socketio(app, server));
+app.configure((app) => socketio(app, server));
 
 server.listen(port);

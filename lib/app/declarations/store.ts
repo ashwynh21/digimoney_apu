@@ -5,11 +5,10 @@ We are going to connect with mongo db...
  */
 
 import mongoose from 'mongoose';
-import {Payload} from '../helpers/payload';
+import { Payload } from '../helpers/payload';
 import Ash from './application';
 
 export default abstract class Store<T extends mongoose.Document> implements StoreInterface {
-
     /*
     let us consider the other base class that hold interfaces to their corresponding servers and how they operate so
     that we are able to build in the same style to this context of the database server.
@@ -28,15 +27,15 @@ export default abstract class Store<T extends mongoose.Document> implements Stor
      */
 
     /*
-    * so we are going to need a connection to the storage object
-    * */
+     * so we are going to need a connection to the storage object
+     * */
     public storage: mongoose.Model<T>;
     public context: Ash;
     public name: string;
     /*
-    * We are also going to need a cache system involved that we can use to setup data we should always have access to
-    * */
-    private cache: Cache<T> = {count: 0, data: {}};
+     * We are also going to need a cache system involved that we can use to setup data we should always have access to
+     * */
+    private cache: Cache<T> = { count: 0, data: {} };
 
     protected constructor(app: Ash, options: Options<T>) {
         this.context = app;
@@ -45,54 +44,47 @@ export default abstract class Store<T extends mongoose.Document> implements Stor
         this.hooks(options.storage);
         this.onmodel(options.storage);
 
-        this.storage = mongoose
-            .model<T>(
-                options.name,
-                options.storage
-            );
+        this.storage = mongoose.model<T>(options.name, options.storage);
 
         this.oninit();
         this.onready();
     }
 
     public create(data: T): Promise<Payload<T>> {
-        return (new this.storage(data))
-            .save()
-            .then((value) => {
-                return value.toObject();
-            });
+        return new this.storage(data).save().then((value) => {
+            return value.toObject();
+        });
     }
 
-    public async read(data: T & { page?: number | string, size?: number | string }):
-        Promise<Payload<T | { page: unknown, length: number }>> {
-        if (typeof data.page!=='number') data.page = Number(data.page);
-        if (typeof data.size!=='number') data.size = Number(data.size);
+    public async read(
+        data: T & { page?: number | string; size?: number | string },
+    ): Promise<Payload<T | { page: unknown; length: number }>> {
+        if (typeof data.page !== 'number') data.page = Number(data.page);
+        if (typeof data.size !== 'number') data.size = Number(data.size);
 
         /*
         here we need to remap the data payload gotten from this request to allow
          */
 
-        const query = {...data} as mongoose.MongooseFilterQuery<T>;
+        const query = { ...data } as mongoose.MongooseFilterQuery<T>;
         delete query.page;
         delete query.size;
 
         if (data.page > -1 && data.size > 0) {
             return {
-                page: await this.storage
+                page: (await this.storage
                     .find(query)
                     .skip(data.page * data.size)
-                    .limit(data.size) as unknown,
-                length: Math.floor(await this.storage.countDocuments(query))
+                    .limit(data.size)) as unknown,
+                length: Math.floor(await this.storage.countDocuments(query)),
             };
         }
-        return this.storage
-            .find(query);
+        return this.storage.find(query);
     }
 
     public update(data: T): Promise<Payload<T>> {
         return this.storage
-            .updateOne({_id: data._id},
-                {$set: data} as unknown as mongoose.MongooseUpdateQuery<T>)
+            .updateOne({ _id: data._id }, ({ $set: data } as unknown) as mongoose.MongooseUpdateQuery<T>)
             .then((value) => {
                 if (!value) throw Error(`Oops, ${this.name} does not exist!`);
 
@@ -101,13 +93,11 @@ export default abstract class Store<T extends mongoose.Document> implements Stor
     }
 
     public delete(data: T): Promise<Payload<T>> {
-        return this.storage
-            .findOneAndRemove({_id: data._id})
-            .then((value) => {
-                if (!value) throw new Error(`Oops, could not remove ${this.name}`);
+        return this.storage.findOneAndRemove({ _id: data._id }).then((value) => {
+            if (!value) throw new Error(`Oops, could not remove ${this.name}`);
 
-                return data;
-            });
+            return data;
+        });
     }
 
     /*
@@ -131,13 +121,13 @@ export default abstract class Store<T extends mongoose.Document> implements Stor
         const self = this;
 
         schema.post('save', function (value, next) {
-            self.cache.data[value._id.toString()] = value as unknown as T;
+            self.cache.data[value._id.toString()] = (value as unknown) as T;
             self.cache.count++;
 
             next();
         });
         schema.post('update', function (value, next) {
-            self.cache.data[value._id.toString()] = value as unknown as T;
+            self.cache.data[value._id.toString()] = (value as unknown) as T;
 
             next();
         });

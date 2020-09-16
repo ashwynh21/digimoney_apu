@@ -1,6 +1,6 @@
-import {AccessService} from './access.class';
-import {Microservices} from '../../declarations';
-import {UserModel} from '../../models/user.model';
+import { AccessService } from './access.class';
+import { Microservices } from '../../declarations';
+import { UserModel } from '../../models/user.model';
 
 export = (access: AccessService): Microservices<UserModel> => ({
     '': {
@@ -12,6 +12,6 @@ export = (access: AccessService): Microservices<UserModel> => ({
         With the authentication function defined and established we can now define functions that allow the requesting
         user to get access tokens as well as refresh tokens.
          */
-        callback: (data: UserModel) => access.access(data)
-    }
-})
+        callback: (data: UserModel) => access.access(data),
+    },
+});

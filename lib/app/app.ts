@@ -11,7 +11,7 @@ import Ash from './declarations/application';
 /*
 attaching the necessary callbacks to the express app.
  */
-const app = (new Ash())
+const app = new Ash()
     /*
     setting up configuration for application
      */

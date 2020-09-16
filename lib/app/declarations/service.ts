@@ -1,15 +1,16 @@
-import {Request, Response} from 'express';
+import { Request, Response } from 'express';
 
-import {Return} from '../helpers/return';
-import {Payload} from '../helpers/payload';
+import { Return } from '../helpers/return';
+import { Payload } from '../helpers/payload';
 
 import mongoose from 'mongoose';
 import Ash from './application';
 
 export default class Service<T extends mongoose.Document> implements ServiceInterface {
     /*
-    * We need to keep a separate reference to the storage system, hence we will need the base class that connects to the
-    * data system*/
+     * We need to keep a separate reference to the storage system, hence we will need the base class that connects to
+     * the data system
+     * */
 
     /*
     The concept of service oriented hooks is designed to have before and after middleware for all the resource
@@ -18,19 +19,22 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
     public hooks: ServiceHooks | undefined;
     public name: string;
     /*
-    * Here we keep a reference to the storage object*/
+     * Here we keep a reference to the storage object*/
     public store: string | undefined;
 
-    public constructor(public context: Ash, options: {
-        /*We name the service for referencing purposes...*/
-        name: string,
+    public constructor(
+        public context: Ash,
+        options: {
+            /*We name the service for referencing purposes...*/
+            name: string;
 
-        /*We name the reference to the storage environment that we will have...*/
-        store?: string,
+            /*We name the reference to the storage environment that we will have...*/
+            store?: string;
 
-        /*We then add the hooking system for crud functionality...*/
-        hooks?: ServiceHooks,
-    }) {
+            /*We then add the hooking system for crud functionality...*/
+            hooks?: ServiceHooks;
+        },
+    ) {
         this.name = options.name;
 
         /*
@@ -50,12 +54,12 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
     }
 
     /*
-    * down here we should keep a function that will allow us to get the
-    * related or corresponding storage object of the service class...
-    *
-    * this is something still worth considering to prevent too much coupling
-    * between the classes...
-    * */
+     * down here we should keep a function that will allow us to get the
+     * related or corresponding storage object of the service class...
+     *
+     * this is something still worth considering to prevent too much coupling
+     * between the classes...
+     * */
 
     addservices(services: Microservices<T>): void {
         Object.entries(services).forEach(([key, value]) => {
@@ -71,9 +75,10 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
             type Callback = (data: T) => Promise<unknown>;
 
             const hooker = (callback: Callback, hook: 'before' | 'after') => {
-                Object(this.context.http)[value.method](`/${this.name}/${key}`,
+                Object(this.context.http)[value.method](
+                    `/${this.name}/${key}`,
                     (request: Request, response: Response, next: (data: unknown) => unknown) => {
-                        const data = {...request.body, ...request.query} as T;
+                        const data = { ...request.body, ...request.query } as T;
 
                         return callback(data)
                             .then((result) => {
@@ -81,32 +86,31 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
                             Currently we make the value returned from the hook remain functional in the hook so
                             that the hook is independent of its action to the service.
                              */
-                                if (hook=='before') {
+                                if (hook == 'before') {
                                     next(result);
                                 } else {
-                                    if ((value.hooks?.after as Array<Callback>).indexOf(callback)
-                                        ===(value.hooks?.after as Array<Callback>).length - 1) {
-                                        this.exit(response, result as Payload<T>,
-                                            {
-                                                message: value.message,
-                                                status: 200,
-                                            }
-                                        );
+                                    if (
+                                        (value.hooks?.after as Array<Callback>).indexOf(callback) ===
+                                        (value.hooks?.after as Array<Callback>).length - 1
+                                    ) {
+                                        this.exit(response, result as Payload<T>, {
+                                            message: value.message,
+                                            status: 200,
+                                        });
                                     } else {
                                         next(result);
                                     }
                                 }
                             })
                             .catch((error: Error) => {
-                                this.exit(response, data,
-                                    {
-                                        message: value.error,
-                                        status: 422,
-                                        debug: error.message,
-                                    }
-                                );
+                                this.exit(response, data, {
+                                    message: value.error,
+                                    status: 422,
+                                    debug: error.message,
+                                });
                             });
-                    });
+                    },
+                );
             };
             /*
             Considering the middleware or hooks of each service we need to attach appropriately to the context
@@ -121,32 +125,29 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
             callback function.
              */
             if (value.callback) {
-                Object(this.context.http)[value.method](`/${this.name}/${key}`,
+                Object(this.context.http)[value.method](
+                    `/${this.name}/${key}`,
                     (request: Request, response: Response, next: (data: unknown) => unknown) => {
-                        const data = {...request.body, ...request.query} as T;
+                        const data = { ...request.body, ...request.query } as T;
 
                         return Promise.resolve(value.callback(data))
                             .then((result: Payload<T>) => {
                                 if (!value.hooks?.after)
-                                    this.exit(response, result,
-                                        {
-                                            message: value.message,
-                                            status: 200,
-                                        }
-                                    );
-                                else
-                                    next(result);
+                                    this.exit(response, result, {
+                                        message: value.message,
+                                        status: 200,
+                                    });
+                                else next(result);
                             })
                             .catch((error: Error) => {
-                                this.exit(response, data,
-                                    {
-                                        message: value.error,
-                                        status: 422,
-                                        debug: error.message,
-                                    }
-                                );
+                                this.exit(response, data, {
+                                    message: value.error,
+                                    status: 422,
+                                    debug: error.message,
+                                });
                             });
-                    });
+                    },
+                );
             }
 
             /*
@@ -183,83 +184,79 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
          */
         const storage = this.context.query<T>(this.store as string);
 
-        this.context.http?.post(`/${this.name}`,
-            (request: Request, response: Response) => {
-                const data = {...request.body, ...request.query} as T;
-                return storage.create(data)
-                    .then((value: Payload<T>) => this.exit(response, value,
-                        {
-                            message: `Hi, an ${this.name} has been created!`,
-                            status: 201,
-                        }
-                    ))
-                    .catch((error: Error) => this.exit(response, data,
-                        {
-                            message: `Oops, could not create ${this.name}!`,
-                            status: 422,
-                            debug: error.message,
-                        })
-                    );
-            }
-        );
-        this.context.http?.get(`/${this.name}`,
-            (request: Request, response: Response) => {
-                const data = {...request.body, ...request.query} as T;
-                return storage.read(data)
-                    .then((value: Payload<T>) => this.exit(response, value,
-                        {
-                            message: 'Hi, a data payload is provided!',
-                            status: 200,
-                        }
-                    ))
-                    .catch((error: Error) => this.exit(response, data,
-                        {
-                            message: `Oops, could not find ${this.name} list!`,
-                            status: 404,
-                            debug: error.message,
-                        }
-                    ));
-            }
-        );
-        this.context.http?.put(`/${this.name}`,
-            (request: Request, response: Response) => {
-                const data = {...request.body, ...request.query} as T;
-                return storage.update(data)
-                    .then((value: Payload<T>) => this.exit(response, value,
-                        {
-                            message: `Hi, an ${this.name} has been updated!`,
-                            status: 200,
-                        }
-                    ))
-                    .catch((error: Error) => this.exit(response, data,
-                        {
-                            message: `Oops, could not update ${this.name}!`,
-                            status: 413,
-                            debug: error.message,
-                        }
-                    ));
-            }
-        );
-        this.context.http?.delete(`/${this.name}`,
-            (request: Request, response: Response) => {
-                const data = {...request.body, ...request.query} as T;
+        this.context.http?.post(`/${this.name}`, (request: Request, response: Response) => {
+            const data = { ...request.body, ...request.query } as T;
+            return storage
+                .create(data)
+                .then((value: Payload<T>) =>
+                    this.exit(response, value, {
+                        message: `Hi, an ${this.name} has been created!`,
+                        status: 201,
+                    }),
+                )
+                .catch((error: Error) =>
+                    this.exit(response, data, {
+                        message: `Oops, could not create ${this.name}!`,
+                        status: 422,
+                        debug: error.message,
+                    }),
+                );
+        });
+        this.context.http?.get(`/${this.name}`, (request: Request, response: Response) => {
+            const data = { ...request.body, ...request.query } as T;
+            return storage
+                .read(data)
+                .then((value: Payload<T>) =>
+                    this.exit(response, value, {
+                        message: 'Hi, a data payload is provided!',
+                        status: 200,
+                    }),
+                )
+                .catch((error: Error) =>
+                    this.exit(response, data, {
+                        message: `Oops, could not find ${this.name} list!`,
+                        status: 404,
+                        debug: error.message,
+                    }),
+                );
+        });
+        this.context.http?.put(`/${this.name}`, (request: Request, response: Response) => {
+            const data = { ...request.body, ...request.query } as T;
+            return storage
+                .update(data)
+                .then((value: Payload<T>) =>
+                    this.exit(response, value, {
+                        message: `Hi, an ${this.name} has been updated!`,
+                        status: 200,
+                    }),
+                )
+                .catch((error: Error) =>
+                    this.exit(response, data, {
+                        message: `Oops, could not update ${this.name}!`,
+                        status: 413,
+                        debug: error.message,
+                    }),
+                );
+        });
+        this.context.http?.delete(`/${this.name}`, (request: Request, response: Response) => {
+            const data = { ...request.body, ...request.query } as T;
 
-                return storage.delete(data)
-                    .then((value: Payload<T>) => this.exit(response, value,
-                        {
-                            message: `Hi, an ${this.name} has been removed!`,
-                            status: 200,
-                        }
-                    ))
-                    .catch((error: Error) => this.exit(response, data,
-                        {
-                            message: `Oops, could not remove ${this.name}!`,
-                            status: 422,
-                            debug: error.message,
-                        }
-                    ));
-            }
-        );
+            return storage
+                .delete(data)
+                .then((value: Payload<T>) =>
+                    this.exit(response, value, {
+                        message: `Hi, an ${this.name} has been removed!`,
+                        status: 200,
+                    }),
+                )
+                .catch((error: Error) =>
+                    this.exit(response, data, {
+                        message: `Oops, could not remove ${this.name}!`,
+                        status: 422,
+                        debug: error.message,
+                    }),
+                );
+        });
         /*
         Now considering the crud operations of the service class, we need to device a way for the user or
         developer to add hooks in order to say guard the route with an authentication hook. What this means
@@ -271,10 +268,14 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
     /*
     We then define a function to filter the request object using the model interface provided in the constructor
      */
-    private exit(response: Response, value: Payload<T>, options: Return<T> & { status: number } = {
-        message: 'Hey, request success!',
-        status: 200,
-    }) {
+    private exit(
+        response: Response,
+        value: Payload<T>,
+        options: Return<T> & { status: number } = {
+            message: 'Hey, request success!',
+            status: 200,
+        },
+    ) {
         const result: Return<T> = {
             message: options.message,
             payload: value,
@@ -298,22 +299,22 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
     we see that there are two sets of hooks that need to be dealt with.
      */
     private before() {
-        const hooks = this.hooks?.before ? this.hooks?.before:{};
+        const hooks = this.hooks?.before ? this.hooks?.before : {};
 
         this.hooker(hooks);
     }
 
     private after() {
-        const hooks = this.hooks?.after ? this.hooks?.after:{};
+        const hooks = this.hooks?.after ? this.hooks?.after : {};
 
         this.hooker(hooks);
     }
 
     private hooker(hooks: {
-        post?: ((data: unknown) => unknown)[],
-        put?: ((data: unknown) => unknown)[],
-        get?: ((data: unknown) => unknown)[],
-        delete?: ((data: unknown) => unknown)[],
+        post?: ((data: unknown) => unknown)[];
+        put?: ((data: unknown) => unknown)[];
+        get?: ((data: unknown) => unknown)[];
+        delete?: ((data: unknown) => unknown)[];
     }) {
         Object.entries(hooks).forEach(([key, value]) => {
             /*
@@ -322,9 +323,10 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
             if (!value) return;
             else {
                 value.forEach((callback) => {
-                    return Object(this.context)[key.toString()](`/${this.name}`,
+                    return Object(this.context)[key.toString()](
+                        `/${this.name}`,
                         (request: Request, response: Response) => {
-                            const data = {...request.body, ...request.query} as T;
+                            const data = { ...request.body, ...request.query } as T;
 
                             return Promise.resolve(callback(data))
                                 .then(() => {
@@ -332,20 +334,16 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
                                     Currently we make the value returned from the hook remain functional in the hook so
                                     that the hook is independent of its action to the service.
                                      */
-                                    this.exit(response, data,
-                                        {
-                                            status: 201,
-                                        }
-                                    );
+                                    this.exit(response, data, {
+                                        status: 201,
+                                    });
                                 })
                                 .catch((error: Error) => {
-                                    this.exit(response, data,
-                                        {
-                                            message: 'Oops, a service error occurred!',
-                                            status: 422,
-                                            debug: error.message,
-                                        }
-                                    );
+                                    this.exit(response, data, {
+                                        message: 'Oops, a service error occurred!',
+                                        status: 422,
+                                        debug: error.message,
+                                    });
                                 });
                         },
                     );
@@ -359,9 +357,10 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
      */
     private authenticate(service: Subservice<T>, key: string) {
         if (service.authenticate) {
-            Object(this.context)[service.method](`/${this.name}/${key}`,
+            Object(this.context)[service.method](
+                `/${this.name}/${key}`,
                 (request: Request, response: Response, next: (data?: unknown) => unknown) => {
-                    const data: T & { token: string } = {...request.body, ...request.query};
+                    const data: T & { token: string } = { ...request.body, ...request.query };
                     /*
                     This is where the authentication method will go.
                      */
@@ -372,15 +371,14 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
                             next();
                         })
                         .catch((error: Error) => {
-                            this.exit(response, data,
-                                {
-                                    message: 'Oops, authentication error occurred!',
-                                    debug: error.message,
-                                    status: 412
-                                }
-                            );
+                            this.exit(response, data, {
+                                message: 'Oops, authentication error occurred!',
+                                debug: error.message,
+                                status: 412,
+                            });
                         });
-                });
+                },
+            );
         }
     }
 }
@@ -422,23 +420,23 @@ Now whats missing is a way to bind service functions or functions extended from 
 service configurations.
  */
 export interface Subservice<T> {
-    method: string,
-    message?: string,
-    error?: string,
-    authenticate?: boolean,
+    method: string;
+    message?: string;
+    error?: string;
+    authenticate?: boolean;
 
     hooks?: {
         /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-        before?: ((data: T | any) => Promise<T | any>)[] | undefined,
+        before?: ((data: T | any) => Promise<T | any>)[] | undefined;
         /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-        after?: ((data: T | any) => Promise<T | any>)[] | undefined,
-    },
+        after?: ((data: T | any) => Promise<T | any>)[] | undefined;
+    };
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    callback: (data: T | any) => Promise<Payload<T | any>>
+    callback: (data: T | any) => Promise<Payload<T | any>>;
 }
 
 export interface Microservices<T> {
-    [route: string]: Subservice<T>
+    [route: string]: Subservice<T>;
 }
 
 export interface ServiceInterface {
@@ -449,15 +447,15 @@ export interface ServiceInterface {
 
 export interface ServiceHooks {
     before?: {
-        post?: ((data: unknown) => unknown)[],
-        put?: ((data: unknown) => unknown)[],
-        get?: ((data: unknown) => unknown)[],
-        delete?: ((data: unknown) => unknown)[],
-    },
+        post?: ((data: unknown) => unknown)[];
+        put?: ((data: unknown) => unknown)[];
+        get?: ((data: unknown) => unknown)[];
+        delete?: ((data: unknown) => unknown)[];
+    };
     after?: {
-        post?: ((data: unknown) => unknown)[],
-        put?: ((data: unknown) => unknown)[],
-        get?: ((data: unknown) => unknown)[],
-        delete?: ((data: unknown) => unknown)[],
-    },
+        post?: ((data: unknown) => unknown)[];
+        put?: ((data: unknown) => unknown)[];
+        get?: ((data: unknown) => unknown)[];
+        delete?: ((data: unknown) => unknown)[];
+    };
 }

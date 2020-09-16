@@ -7,7 +7,7 @@
     "postinstall": "npm run build",
     "build": "webpack",
     "start": "node build/index.bundle.js",
-    "lint": "eslint --fix --ext .ts ."
+    "lint": "eslint --fix --quiet  --ext .ts ."
   },
   "keywords": [],
   "author": "",
@@ -40,7 +40,10 @@
     "@typescript-eslint/eslint-plugin": "^3.1.0",
     "@typescript-eslint/parser": "^3.1.0",
     "eslint": "^7.1.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-prettier": "^3.1.4",
     "file-loader": "^6.0.0",
+    "prettier": "^2.1.2",
     "ts-loader": "^7.0.5",
     "typescript": "^3.9.3",
     "webpack": "^4.43.0",

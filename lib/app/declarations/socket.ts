@@ -49,7 +49,7 @@ export default abstract class Socket<T> implements SocketInterface {
     /*
     The first hook that we will be adding is an oncreate hook that will have the socket object in it.
      */
-    protected async abstract onready(): Promise<void>;
+    protected abstract async onready(): Promise<void>;
 
     /*
     Let us create a function that will allow us to easily emit events using the client object
@@ -100,8 +100,7 @@ export default abstract class Socket<T> implements SocketInterface {
            initialization that may need to be done before any of the events are configured.
          */
 
-        this.onready()
-            .catch((error) => this.client.emit(`${this.name}/error`, error));
+        this.onready().catch((error) => this.client.emit(`${this.name}/error`, error));
         /*
         At this point the class should be initialized in terms of properties and should be ready to start binding in
         the configured service function that it has to offer.
@@ -118,24 +117,24 @@ export default abstract class Socket<T> implements SocketInterface {
 }
 
 export interface SocketInterface {
-    name: string
+    name: string;
 }
 
 export interface SocketEvent {
-    callback: (message: Message) => unknown | Promise<unknown>
+    callback: (message: Message) => unknown | Promise<unknown>;
 }
 
 interface Options {
-    name: string,
+    name: string;
     /*
     let us add a field that will allow the
      */
 }
 
 export interface Message {
-    data: unknown,
+    data: unknown;
 
-    debug?: unknown,
+    debug?: unknown;
 }
 
 /*
@@ -153,21 +152,21 @@ export interface Client extends io.Socket {
     /*
     this method will allow us to set a service to the socket.
      */
-    fetch: (service: string) => SocketInterface
+    fetch: (service: string) => SocketInterface;
     /*
     this method will allow us to get the service back from the socket.
      */
-    apply: (service: SocketInterface) => Client
+    apply: (service: SocketInterface) => Client;
 
     /*
     so we are going to need a place to store these services since there are no properties that we can reuse
      */
-    services: { [name: string]: SocketInterface }
+    services: { [name: string]: SocketInterface };
 
     /*
     let use create a property to hold the meta data provided on connection to the socket server
      */
-    meta: unknown
+    meta: unknown;
 }
 
 /*

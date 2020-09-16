@@ -1,5 +1,4 @@
-
-export = {
+export default {
     required_email: 'Oops, email address is required',
     invalid_email: 'Oops, {VALUE} is not a valid email address!',
     too_large_error: 'Oops, request is too large to handle!',
@@ -55,7 +54,7 @@ export = {
     user_not_recovered: 'Oops, unable to recover your account!',
     inkhundla_required: 'Oops, inkhundla not found!',
 
-    safety_list_cached: 'Hey, here\'s your safety list!',
+    safety_list_cached: 'Hey, here is your safety list!',
     safety_list_error: 'Oops, could not cache safety list!',
 
     safety_removed: 'Hey, user has been removed!',
@@ -74,4 +73,4 @@ export = {
     required_country: 'Oops, country has not been specified!',
     required_idtoken: 'Oops, id token was not found!',
     cannot_reset: 'Oops, we could reset the account!',
-}
+};

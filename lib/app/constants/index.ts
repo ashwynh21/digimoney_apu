@@ -3,5 +3,5 @@ import numbers from './numbers';
 
 export = {
     strings,
-    numbers
-}
+    numbers,
+};
