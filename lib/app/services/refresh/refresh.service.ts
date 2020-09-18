@@ -2,8 +2,9 @@ import Ash from '../../declarations/application';
 
 import jwt, { TokenExpiredError } from 'jsonwebtoken';
 import { Microservices } from '../../declarations';
+import { Token } from './index';
 
-export = (app: Ash): Microservices<{ token: string }> => ({
+export = (app: Ash): Microservices<Token> => ({
     '': {
         method: 'post',
         message: 'Hi, here is your new access token!',
@@ -13,7 +14,7 @@ export = (app: Ash): Microservices<{ token: string }> => ({
         With the authentication function defined and established we can now define functions that allow the requesting
         user to get access tokens as well as refresh tokens.
          */
-        callback: async (data: { token: string }) => {
+        callback: async (data) => {
             const settings = app.configuration['authorization'];
             const token = data?.token;
 
@@ -56,7 +57,7 @@ export = (app: Ash): Microservices<{ token: string }> => ({
                             token: jwt.sign(payload, settings.secret, {
                                 algorithm: 'HS256',
                             }),
-                        };
+                        } as Token;
                     }
                 } else {
                     throw error;

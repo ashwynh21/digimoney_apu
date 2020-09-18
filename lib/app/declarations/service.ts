@@ -425,8 +425,8 @@ export interface Subservice<T> {
     authenticate?: boolean;
 
     hooks?: {
-        before?: ((data: T) => Promise<T>)[] | undefined;
-        after?: ((data: T) => Promise<T>)[] | undefined;
+        before?: ((data: T) => Promise<T>)[];
+        after?: ((data: T) => Promise<T>)[];
     };
     callback: (data: T) => Promise<T>;
 }

@@ -4,11 +4,11 @@ import mongoose from 'mongoose';
 import Ash from '../../declarations/application';
 import Service from '../../declarations/service';
 
-export default (app: Ash): void => {
-    interface Token extends mongoose.Document {
-        token: string;
-    }
+export interface Token extends mongoose.Document {
+    token: string;
+}
 
+export default (app: Ash): void => {
     const refresh = new Service<Token>(app, {
         name: 'refresh',
     });
