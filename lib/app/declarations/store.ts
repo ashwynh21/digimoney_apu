@@ -5,7 +5,6 @@ We are going to connect with mongo db...
  */
 
 import mongoose from 'mongoose';
-import { Payload } from '../helpers/payload';
 import Ash from './application';
 
 export default abstract class Store<T extends mongoose.Document> implements StoreInterface {
@@ -50,7 +49,7 @@ export default abstract class Store<T extends mongoose.Document> implements Stor
         this.onready();
     }
 
-    public create(data: T): Promise<Payload<T>> {
+    public create(data: T): Promise<T> {
         return new this.storage(data).save().then((value) => {
             return value.toObject();
         });
@@ -58,7 +57,7 @@ export default abstract class Store<T extends mongoose.Document> implements Stor
 
     public async read(
         data: T & { page?: number | string; size?: number | string },
-    ): Promise<Payload<T | { page: unknown; length: number }>> {
+    ): Promise<T | Array<T> | { page: unknown; length: number }> {
         if (typeof data.page !== 'number') data.page = Number(data.page);
         if (typeof data.size !== 'number') data.size = Number(data.size);
 
@@ -82,7 +81,7 @@ export default abstract class Store<T extends mongoose.Document> implements Stor
         return this.storage.find(query);
     }
 
-    public update(data: T): Promise<Payload<T>> {
+    public update(data: T): Promise<T> {
         return this.storage
             .updateOne({ _id: data._id }, ({ $set: data } as unknown) as mongoose.MongooseUpdateQuery<T>)
             .then((value) => {
@@ -92,7 +91,7 @@ export default abstract class Store<T extends mongoose.Document> implements Stor
             });
     }
 
-    public delete(data: T): Promise<Payload<T>> {
+    public delete(data: T): Promise<T> {
         return this.storage.findOneAndRemove({ _id: data._id }).then((value) => {
             if (!value) throw new Error(`Oops, could not remove ${this.name}`);
 

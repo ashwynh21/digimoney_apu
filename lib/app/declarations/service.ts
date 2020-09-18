@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 
 import { Return } from '../helpers/return';
-import { Payload } from '../helpers/payload';
 
 import mongoose from 'mongoose';
 import Ash from './application';
@@ -72,7 +71,7 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
             /*
             lets add a type for the function callback
              */
-            type Callback = (data: T) => Promise<unknown>;
+            type Callback = (data: T) => Promise<T>;
 
             const hooker = (callback: Callback, hook: 'before' | 'after') => {
                 Object(this.context.http)[value.method](
@@ -93,7 +92,7 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
                                         (value.hooks?.after as Array<Callback>).indexOf(callback) ===
                                         (value.hooks?.after as Array<Callback>).length - 1
                                     ) {
-                                        this.exit(response, result as Payload<T>, {
+                                        this.exit(response, result, {
                                             message: value.message,
                                             status: 200,
                                         });
@@ -131,7 +130,7 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
                         const data = { ...request.body, ...request.query } as T;
 
                         return Promise.resolve(value.callback(data))
-                            .then((result: Payload<T>) => {
+                            .then((result: T) => {
                                 if (!value.hooks?.after)
                                     this.exit(response, result, {
                                         message: value.message,
@@ -188,7 +187,7 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
             const data = { ...request.body, ...request.query } as T;
             return storage
                 .create(data)
-                .then((value: Payload<T>) =>
+                .then((value: T) =>
                     this.exit(response, value, {
                         message: `Hi, an ${this.name} has been created!`,
                         status: 201,
@@ -206,8 +205,8 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
             const data = { ...request.body, ...request.query } as T;
             return storage
                 .read(data)
-                .then((value: Payload<T>) =>
-                    this.exit(response, value, {
+                .then((value: T | Array<T> | { page: unknown; length: number }) =>
+                    this.exit(response, value as Array<T>, {
                         message: 'Hi, a data payload is provided!',
                         status: 200,
                     }),
@@ -224,7 +223,7 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
             const data = { ...request.body, ...request.query } as T;
             return storage
                 .update(data)
-                .then((value: Payload<T>) =>
+                .then((value: T) =>
                     this.exit(response, value, {
                         message: `Hi, an ${this.name} has been updated!`,
                         status: 200,
@@ -243,7 +242,7 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
 
             return storage
                 .delete(data)
-                .then((value: Payload<T>) =>
+                .then((value: T) =>
                     this.exit(response, value, {
                         message: `Hi, an ${this.name} has been removed!`,
                         status: 200,
@@ -270,7 +269,7 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
      */
     private exit(
         response: Response,
-        value: Payload<T>,
+        value: T | Array<T>,
         options: Return<T> & { status: number } = {
             message: 'Hey, request success!',
             status: 200,
@@ -426,13 +425,10 @@ export interface Subservice<T> {
     authenticate?: boolean;
 
     hooks?: {
-        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-        before?: ((data: T | any) => Promise<T | any>)[] | undefined;
-        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-        after?: ((data: T | any) => Promise<T | any>)[] | undefined;
+        before?: ((data: T) => Promise<T>)[] | undefined;
+        after?: ((data: T) => Promise<T>)[] | undefined;
     };
-    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    callback: (data: T | any) => Promise<Payload<T | any>>;
+    callback: (data: T) => Promise<T>;
 }
 
 export interface Microservices<T> {
