@@ -57,7 +57,7 @@ export default abstract class Store<T extends mongoose.Document> implements Stor
 
     public async read(
         data: T & { page?: number | string; size?: number | string },
-    ): Promise<T | Array<T> | { page: Array<T>; length: number }> {
+    ): Promise<Array<T> | { page: Array<T>; length: number }> {
         if (typeof data.page !== 'number') data.page = Number(data.page);
         if (typeof data.size !== 'number') data.size = Number(data.size);
 
