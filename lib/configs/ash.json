@@ -2,7 +2,7 @@
   "host": "localhost",
   "port": 4000,
   "public": "../public/",
-  "mongodb": "localhost",
+  "mongodb": "mongodb+srv://ashwynh21:gbabY@100@cluster0.9kqhs.gcp.mongodb.net/tvlicense?retryWrites=true&w=majority",
   "authorization": {
     "strategy": "jwt",
     "secret": "mysecret",
