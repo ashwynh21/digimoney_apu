@@ -10,5 +10,5 @@ export default (app: Ash): void => {
     /*
     this function now works, i still need to check how configurable i can go with it.
      */
-    app.http?.use('/assets', express.static(`${__dirname}/assets/`));
+    app.http?.use('/assets', express.static('./build/assets/'));
 };
