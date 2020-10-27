@@ -11,7 +11,8 @@ module.exports = {
     plugins: [
         new copy({
             patterns: [
-                { from: 'configs', to: 'configs' }
+                { from: 'configs', to: 'configs' },
+                { from: 'assets', to: 'assets' }
             ]
         })
     ],
