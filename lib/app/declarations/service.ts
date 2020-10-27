@@ -68,7 +68,7 @@ export default class Service<T extends Model> implements ServiceInterface {
             if (files) {
                 data = {
                     ...data,
-                    ...files,
+                    files,
                 };
             }
 
@@ -195,7 +195,7 @@ export default class Service<T extends Model> implements ServiceInterface {
             if (files) {
                 data = {
                     ...data,
-                    ...files,
+                    files,
                 };
             }
 
