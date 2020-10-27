@@ -1,12 +1,11 @@
-import { Document, Schema } from 'mongoose';
+import { Schema } from 'mongoose';
+import { Model } from '../helpers/model';
 
-export interface UserModel extends Document {
+export interface UserModel extends Model {
     username: string;
     password: string;
 
     access: Array<string>;
-
-    updated: Date;
 }
 
 export const UserSchema = new Schema<UserModel>(
@@ -22,8 +21,9 @@ export const UserSchema = new Schema<UserModel>(
             type: Date,
             default: new Date(),
         },
+        created: Date,
 
         access: [String],
     },
-    { collection: 'user' },
+    { collection: 'users' },
 );

@@ -4,8 +4,9 @@ import { Return } from '../helpers/return';
 
 import mongoose from 'mongoose';
 import Ash from './application';
+import { Model } from '../helpers/model';
 
-export default class Service<T extends mongoose.Document> implements ServiceInterface {
+export default class Service<T extends Model> implements ServiceInterface {
     /*
      * We need to keep a separate reference to the storage system, hence we will need the base class that connects to
      * the data system
@@ -204,7 +205,7 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
         this.context.http?.get(`/${this.name}`, (request: Request, response: Response) => {
             const data = { ...request.body, ...request.query } as T;
             return storage
-                .read(data)
+                .read(data as mongoose.MongooseFilterQuery<T>)
                 .then((value: T | Array<T> | { page: unknown; length: number }) =>
                     this.exit(response, value as Array<T>, {
                         message: 'Hi, a data payload is provided!',

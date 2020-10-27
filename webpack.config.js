@@ -1,10 +1,21 @@
 const path = require('path');
+const copy = require('copy-webpack-plugin');
 
 module.exports = {
     mode: 'development',
 
+    context: path.join(__dirname, 'lib'),
+
+    plugins: [
+        new copy({
+            patterns: [
+                { from: 'configs', to: 'configs' }
+            ]
+        })
+    ],
+
     entry: {
-        index: './lib/public/index.ts'
+        index: './public/index.ts'
     },
 
     module: {
@@ -15,9 +26,9 @@ module.exports = {
                 exclude: /node_modules/,
             },
             {
-                test: /\.json$/,
+                test: /\.(json)$/,
                 use: ['file-loader'],
-                exclude: [`${__dirname}`]
+                exclude: [__dirname],
             }
         ],
     },

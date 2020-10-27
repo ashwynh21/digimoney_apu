@@ -7,7 +7,9 @@ We are going to connect with mongo db...
 import mongoose from 'mongoose';
 import Ash from './application';
 
-export default abstract class Store<T extends mongoose.Document> implements StoreInterface {
+import { Model } from '../helpers/model';
+
+export default abstract class Store<T extends Model> implements StoreInterface {
     /*
     let us consider the other base class that hold interfaces to their corresponding servers and how they operate so
     that we are able to build in the same style to this context of the database server.
@@ -56,7 +58,12 @@ export default abstract class Store<T extends mongoose.Document> implements Stor
     }
 
     public async read(
-        data: T & { page?: number | string; size?: number | string },
+        data: mongoose.MongooseFilterQuery<T> & {
+            page?: number | string;
+            size?: number | string;
+            from?: string;
+            to?: string;
+        },
     ): Promise<Array<T> | { page: Array<T>; length: number }> {
         if (typeof data.page !== 'number') data.page = Number(data.page);
         if (typeof data.size !== 'number') data.size = Number(data.size);
@@ -64,10 +71,43 @@ export default abstract class Store<T extends mongoose.Document> implements Stor
         /*
         here we need to remap the data payload gotten from this request to allow
          */
-
-        const query = { ...data } as mongoose.MongooseFilterQuery<T>;
+        let query = { ...data };
         delete query.page;
         delete query.size;
+        delete query.from;
+        delete query.to;
+
+        query = Object.entries(query).reduce((result, [key, value]) => {
+            if (typeof value == 'string' && !/^(?=[a-f\d]{24}$)(\d+[a-f]|[a-f]+\d)/i.test(value)) {
+                if (!result['$or']) {
+                    result['$or'] = [];
+                }
+                const data: { [name: string]: RegExp } = {};
+                data[key] = RegExp(value, 'i');
+
+                result['$or'].push(data);
+                return result;
+            }
+            result[key] = value;
+            return result;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        }, {} as { [name: string]: any }) as mongoose.MongooseFilterQuery<T>;
+
+        let created: { [name: string]: Date } | undefined;
+        if (data.from) {
+            if (!created) created = {};
+            created['$gte'] = new Date(data.from);
+        }
+        if (data.to) {
+            if (!created) created = {};
+            created['$lte'] = new Date(data.to);
+        }
+        if (created) {
+            query = {
+                ...query,
+                created,
+            };
+        }
 
         if (data.page > -1 && data.size > 0) {
             return {
@@ -83,7 +123,9 @@ export default abstract class Store<T extends mongoose.Document> implements Stor
 
     public update(data: T): Promise<T> {
         return this.storage
-            .updateOne({ _id: data._id }, ({ $set: data } as unknown) as mongoose.MongooseUpdateQuery<T>)
+            .updateOne({ _id: data._id }, <mongoose.MongooseUpdateQuery<T>>{
+                $set: <mongoose.UpdateQuery<T>>data,
+            })
             .then((value) => {
                 if (!value) throw Error(`Oops, ${this.name} does not exist!`);
 

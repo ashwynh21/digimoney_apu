@@ -1,10 +1,10 @@
 import service from './refresh.service';
-import mongoose from 'mongoose';
 
 import Ash from '../../declarations/application';
 import Service from '../../declarations/service';
+import { Model } from '../../helpers/model';
 
-export interface Token extends mongoose.Document {
+export interface Token extends Model {
     token: string;
 }
 
