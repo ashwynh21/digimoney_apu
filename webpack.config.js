@@ -3,7 +3,9 @@ const copy = require('copy-webpack-plugin');
 
 module.exports = {
     mode: 'development',
-
+    performance: {
+        hints: false,
+    },
     context: path.join(__dirname, 'lib'),
 
     plugins: [

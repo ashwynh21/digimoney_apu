@@ -62,6 +62,19 @@ export default class Service<T extends Model> implements ServiceInterface {
      * */
 
     addservices(services: Microservices<T>): void {
+        const spreader = (body: Partial<T>, query: Partial<T>, files?: File[]): T => {
+            let data = { ...body, ...query } as T;
+
+            if (files) {
+                data = {
+                    ...data,
+                    ...files,
+                };
+            }
+
+            return data;
+        };
+
         Object.entries(services).forEach(([key, value]) => {
             /*
             Here we can check to see if the service request has an authentication flag so we add authentication
@@ -78,7 +91,11 @@ export default class Service<T extends Model> implements ServiceInterface {
                 Object(this.context.http)[value.method](
                     `/${this.name}/${key}`,
                     (request: Request, response: Response, next: (data: unknown) => unknown) => {
-                        const data = { ...request.body, ...request.query } as T;
+                        const data = spreader(
+                            request.body,
+                            (request.query as unknown) as Partial<T>,
+                            (request.files as unknown) as File[],
+                        );
 
                         return callback(data)
                             .then((result) => {
@@ -128,7 +145,11 @@ export default class Service<T extends Model> implements ServiceInterface {
                 Object(this.context.http)[value.method](
                     `/${this.name}/${key}`,
                     (request: Request, response: Response, next: (data: unknown) => unknown) => {
-                        const data = { ...request.body, ...request.query } as T;
+                        const data = spreader(
+                            request.body,
+                            (request.query as unknown) as Partial<T>,
+                            (request.files as unknown) as File[],
+                        );
 
                         return Promise.resolve(value.callback(data))
                             .then((result: T) => {
@@ -168,6 +189,18 @@ export default class Service<T extends Model> implements ServiceInterface {
     2. let us start binding the app to the crud functionality of the service.
      */
     private crud() {
+        const spreader = (body: Partial<T>, query: Partial<T>, files?: File[]): T => {
+            let data = { ...body, ...query } as T;
+
+            if (files) {
+                data = {
+                    ...data,
+                    ...files,
+                };
+            }
+
+            return data;
+        };
         /*
         since we are creating a crud system in this function we simply need to implement base functionality
         using the same route but different rest methods.
@@ -185,7 +218,11 @@ export default class Service<T extends Model> implements ServiceInterface {
         const storage = this.context.query<T>(this.store as string);
 
         this.context.http?.post(`/${this.name}`, (request: Request, response: Response) => {
-            const data = { ...request.body, ...request.query } as T;
+            const data = spreader(
+                request.body,
+                (request.query as unknown) as Partial<T>,
+                (request.files as unknown) as File[],
+            );
             return storage
                 .create(data)
                 .then((value: T) =>
@@ -203,7 +240,7 @@ export default class Service<T extends Model> implements ServiceInterface {
                 );
         });
         this.context.http?.get(`/${this.name}`, (request: Request, response: Response) => {
-            const data = { ...request.body, ...request.query } as T;
+            const data = spreader(request.body, (request.query as unknown) as Partial<T>);
             return storage
                 .read(data as mongoose.MongooseFilterQuery<T>)
                 .then((value: T | Array<T> | { page: unknown; length: number }) =>
@@ -221,7 +258,11 @@ export default class Service<T extends Model> implements ServiceInterface {
                 );
         });
         this.context.http?.put(`/${this.name}`, (request: Request, response: Response) => {
-            const data = { ...request.body, ...request.query } as T;
+            const data = spreader(
+                request.body,
+                (request.query as unknown) as Partial<T>,
+                (request.files as unknown) as File[],
+            );
             return storage
                 .update(data)
                 .then((value: T) =>
@@ -239,7 +280,7 @@ export default class Service<T extends Model> implements ServiceInterface {
                 );
         });
         this.context.http?.delete(`/${this.name}`, (request: Request, response: Response) => {
-            const data = { ...request.body, ...request.query } as T;
+            const data = spreader(request.body, (request.query as unknown) as Partial<T>);
 
             return storage
                 .delete(data)
