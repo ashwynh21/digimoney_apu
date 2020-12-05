@@ -3,14 +3,14 @@ import Ash from './declarations/application';
 
 export = async (app: Ash): Promise<void> => {
     app.database = await mongoose
-        .connect(app.configuration['mongodb'], {
+        .connect(`${app.configuration['mongodb']}${app.configuration['database']}`, {
             useCreateIndex: true,
             useNewUrlParser: true,
             useUnifiedTopology: true,
             useFindAndModify: false,
         })
         .then((connection) => {
-            console.info(`mongoose connection established on ${app.configuration['mongodb']}`);
+            console.info(`mongoose connected on ${app.configuration['mongodb']} to ${app.configuration['database']}`);
 
             return connection;
         })

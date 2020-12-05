@@ -4,7 +4,7 @@ import jwt, { TokenExpiredError } from 'jsonwebtoken';
 import { Microservices } from '../../declarations';
 import { Token } from './index';
 
-export = (app: Ash): Microservices<Token> => ({
+export default (app: Ash): Microservices<Token> => ({
     '': {
         method: 'post',
         message: 'Hi, here is your new access token!',

@@ -1,6 +1,7 @@
 import { Express } from 'express';
-import Service, { ServiceInterface } from './service';
-import Store, { StoreInterface } from './store';
+import { Model } from '../helpers/model';
+import Service from './service';
+import Store from './store';
 
 import io from 'socket.io';
 import mongoose from 'mongoose';
@@ -11,13 +12,13 @@ import helmet from 'helmet';
 import compress from 'compression';
 
 export default class Ash implements Application {
-    database: mongoose.Mongoose | undefined;
+    database!: mongoose.Mongoose;
+    http!: Express;
+    io!: io.Server;
 
-    http: Express | undefined;
-    io: io.Server | undefined;
-
-    private services: { [name: string]: ServiceInterface } = {};
-    private stores: { [name: string]: StoreInterface } = {};
+    private services: { [name: string]: <T extends Model>() => Service<T> } = {};
+    private stores: { [name: string]: <T extends Model>() => Store<T> } = {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public configuration: { [name: string]: any } = {};
 
     constructor() {
@@ -41,23 +42,23 @@ export default class Ash implements Application {
             .use(compress());
     }
 
-    public apply<T extends mongoose.Document>(service: Service<T>): Service<T> {
-        this.services[service.name] = service;
+    public apply<T extends Model>(service: Service<T>): Service<T> {
+        this.services[service.name] = <T extends Model>() => (service as unknown) as Service<T>;
 
         return service;
     }
 
-    public commit<T extends mongoose.Document>(store: Store<T>): Store<T> {
-        this.stores[store.name] = store;
+    public commit<T extends Model>(store: Store<T>): Store<T> {
+        this.stores[store.name] = <T extends Model>() => (store as unknown) as Store<T>;
         return store;
     }
 
-    public fetch<T extends mongoose.Document>(service: string): Service<T> {
-        return this.services[service] as Service<T>;
+    public fetch<T extends Model>(service: string): Service<T> {
+        return this.services[service]();
     }
 
-    public query<T extends mongoose.Document>(store: string): Store<T> {
-        return this.stores[store] as Store<T>;
+    public query<T extends Model>(store: string): Store<T> {
+        return this.stores[store]();
     }
 
     public configure(callback: (app: Ash) => void): Ash {
@@ -79,15 +80,15 @@ export default class Ash implements Application {
 interface Application {
     configure: (callback: (app: Ash) => void) => Ash;
 
-    fetch: <T extends mongoose.Document>(service: string) => Service<T>;
-    apply: <T extends mongoose.Document>(service: Service<T>) => Service<T>;
+    fetch: <T extends Model>(service: string) => Service<T>;
+    apply: <T extends Model>(service: Service<T>) => Service<T>;
 
-    commit: <T extends mongoose.Document>(store: Store<T>) => Store<T>;
-    query: <T extends mongoose.Document>(store: string) => Store<T>;
+    commit: <T extends Model>(store: Store<T>) => Store<T>;
+    query: <T extends Model>(store: string) => Store<T>;
 
     authenticate: (data: { token: string }) => Promise<Record<string, unknown>>;
 
-    io?: io.Server;
-    http?: Express;
-    database?: mongoose.Mongoose;
+    io: io.Server;
+    http: Express;
+    database: mongoose.Mongoose;
 }

@@ -1,8 +1,9 @@
 {
   "host": "localhost",
   "port": 4000,
-  "public": "../public/",
-  "mongodb": "mongodb+srv://ashwynh21:gbabY@100@cluster0.9kqhs.gcp.mongodb.net/tvlicense?retryWrites=true&w=majority",
+  "assets": "assets",
+  "mongodb": "mongodb://localhost:27017/",
+  "database": "app",
   "authorization": {
     "strategy": "jwt",
     "secret": "mysecret",

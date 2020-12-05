@@ -9,7 +9,7 @@ items, that is, the message name and the default responses.
 import io from 'socket.io';
 import Ash from './application';
 
-export default abstract class Socket<T> implements SocketInterface {
+export default abstract class Socket implements SocketInterface {
     /*
     Let us make some more consideration with this class.
 
@@ -38,7 +38,7 @@ export default abstract class Socket<T> implements SocketInterface {
     if we bind or bootstrap the socket with the services needed then we should be able to add any functionality that is
     required of us.
 
-    so now with the socket object in place we should be able to do alot more.
+    so now with the socket object in place we should be able to do a lot more.
      */
     protected constructor(public client: Client, options: Options) {
         this.name = options.name;
@@ -47,14 +47,14 @@ export default abstract class Socket<T> implements SocketInterface {
     }
 
     /*
-    The first hook that we will be adding is an oncreate hook that will have the socket object in it.
+    The first hook that we will be adding is an on-create hook that will have the socket object in it.
      */
-    protected abstract async onready(): Promise<void>;
+    protected abstract onready(): Promise<void>;
 
     /*
     Let us create a function that will allow us to easily emit events using the client object
      */
-    protected emit(name: string, message: Message): boolean {
+    public emit(name: string, message: Message): boolean {
         return this.client.emit(`${this.name}/${name}`, message);
     }
 
@@ -152,11 +152,11 @@ export interface Client extends io.Socket {
     /*
     this method will allow us to set a service to the socket.
      */
-    fetch: (service: string) => SocketInterface;
+    fetch: <T extends Socket>(service: string) => T;
     /*
     this method will allow us to get the service back from the socket.
      */
-    apply: (service: SocketInterface) => Client;
+    apply: <T extends Socket>(service: T) => Client;
 
     /*
     so we are going to need a place to store these services since there are no properties that we can reuse
@@ -166,10 +166,6 @@ export interface Client extends io.Socket {
     /*
     let use create a property to hold the meta data provided on connection to the socket server
      */
-    meta: unknown;
+    meta: { token: string };
 }
 
-/*
-Making more considerations we see that decorators in TS may be able to help us with the issue of binding our events
-to the socket service class
- */

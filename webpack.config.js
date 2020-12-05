@@ -1,10 +1,25 @@
 const path = require('path');
+const copy = require('copy-webpack-plugin');
+const externals = require('webpack-node-externals');
 
 module.exports = {
     mode: 'development',
+    stats: {
+        warnings: false,
+    },
+    context: path.join(__dirname, 'lib'),
+
+    plugins: [
+        new copy({
+            patterns: [
+                { from: 'configs', to: 'configs' },
+                { from: 'assets', to: 'assets' }
+            ]
+        })
+    ],
 
     entry: {
-        index: './lib/public/index.ts'
+        index: './public/index.ts'
     },
 
     module: {
@@ -15,13 +30,14 @@ module.exports = {
                 exclude: /node_modules/,
             },
             {
-                test: /\.json$/,
+                test: /\.(json)$/,
                 use: ['file-loader'],
-                exclude: [`${__dirname}`]
+                exclude: [__dirname],
             }
         ],
     },
     target: 'node',
+    externals: [externals()],
     resolve: {
         extensions: [ '.tsx', '.ts', '.js' ],
     },

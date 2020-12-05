@@ -1,9 +1,10 @@
 import Ash from './declarations/application';
-import { Client, SocketInterface } from './declarations';
+import { Client } from './declarations';
 
 import io from 'socket.io';
 import sockets from './sockets';
 import http from 'http';
+import Socket from './declarations/socket';
 
 export default (app: Ash, server: http.Server): void => {
     app.io = io(server, { serveClient: false });
@@ -36,13 +37,13 @@ function bootstrap(app: Ash, socket: io.Socket): Client {
     client.services = {};
     client.meta = socket.handshake.query;
 
-    client.apply = (service: SocketInterface) => {
+    client.apply = <T extends Socket>(service: T) => {
         client.services[service.name] = service;
 
         return client;
     };
-    client.fetch = (service: string) => {
-        return client.services[service];
+    client.fetch = <T extends Socket>(service: string) => {
+        return client.services[service] as T;
     };
 
     return client;

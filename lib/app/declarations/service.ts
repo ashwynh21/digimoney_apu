@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
-
+import { Model } from '../helpers/model';
 import { Return } from '../helpers/return';
 
 import mongoose from 'mongoose';
 import Ash from './application';
 
-export default class Service<T extends mongoose.Document> implements ServiceInterface {
+export default class Service<T extends Model> {
     /*
      * We need to keep a separate reference to the storage system, hence we will need the base class that connects to
      * the data system
@@ -61,12 +61,27 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
      * */
 
     addservices(services: Microservices<T>): void {
+        const spreader = (body: Partial<T>, query: Partial<T>, files?: File[]): T => {
+            let data = { ...body, ...query } as T;
+
+            if (files) {
+                data = {
+                    ...data,
+                    files,
+                };
+            }
+
+            return data;
+        };
+
         Object.entries(services).forEach(([key, value]) => {
             /*
             Here we can check to see if the service request has an authentication flag so we add authentication
             middleware before any hooks are added to it
              */
-            this.authenticate(value, key);
+            if (value.authenticate) {
+                this.authenticate(value, key);
+            }
 
             /*
             lets add a type for the function callback
@@ -75,16 +90,20 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
 
             const hooker = (callback: Callback, hook: 'before' | 'after') => {
                 Object(this.context.http)[value.method](
-                    `/${this.name}/${key}`,
+                    `/${this.name}${key.length > 0 ? '/' : ''}${key}`,
                     (request: Request, response: Response, next: (data: unknown) => unknown) => {
-                        const data = { ...request.body, ...request.query } as T;
+                        const data = spreader(
+                            request.body,
+                            (request.query as unknown) as Partial<T>,
+                            (request.files as unknown) as File[],
+                        );
 
                         return callback(data)
                             .then((result) => {
                                 /*
-                            Currently we make the value returned from the hook remain functional in the hook so
-                            that the hook is independent of its action to the service.
-                             */
+                                Currently we make the value returned from the hook remain functional in the hook so
+                                that the hook is independent of its action to the service.
+                                 */
                                 if (hook == 'before') {
                                     next(result);
                                 } else {
@@ -125,9 +144,13 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
              */
             if (value.callback) {
                 Object(this.context.http)[value.method](
-                    `/${this.name}/${key}`,
+                    `/${this.name}${key.length > 0 ? '/' : ''}${key}`,
                     (request: Request, response: Response, next: (data: unknown) => unknown) => {
-                        const data = { ...request.body, ...request.query } as T;
+                        const data = spreader(
+                            request.body,
+                            (request.query as unknown) as Partial<T>,
+                            (request.files as unknown) as File[],
+                        );
 
                         return Promise.resolve(value.callback(data))
                             .then((result: T) => {
@@ -167,6 +190,18 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
     2. let us start binding the app to the crud functionality of the service.
      */
     private crud() {
+        const spreader = (body: Partial<T>, query: Partial<T>, files?: File[]): T => {
+            let data = { ...body, ...query } as T;
+
+            if (files) {
+                data = {
+                    ...data,
+                    files,
+                };
+            }
+
+            return data;
+        };
         /*
         since we are creating a crud system in this function we simply need to implement base functionality
         using the same route but different rest methods.
@@ -184,7 +219,11 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
         const storage = this.context.query<T>(this.store as string);
 
         this.context.http?.post(`/${this.name}`, (request: Request, response: Response) => {
-            const data = { ...request.body, ...request.query } as T;
+            const data = spreader(
+                request.body,
+                (request.query as unknown) as Partial<T>,
+                (request.files as unknown) as File[],
+            );
             return storage
                 .create(data)
                 .then((value: T) =>
@@ -202,9 +241,9 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
                 );
         });
         this.context.http?.get(`/${this.name}`, (request: Request, response: Response) => {
-            const data = { ...request.body, ...request.query } as T;
+            const data = spreader(request.body, (request.query as unknown) as Partial<T>);
             return storage
-                .read(data)
+                .read(data as mongoose.MongooseFilterQuery<T>)
                 .then((value: T | Array<T> | { page: unknown; length: number }) =>
                     this.exit(response, value as Array<T>, {
                         message: 'Hi, a data payload is provided!',
@@ -220,7 +259,11 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
                 );
         });
         this.context.http?.put(`/${this.name}`, (request: Request, response: Response) => {
-            const data = { ...request.body, ...request.query } as T;
+            const data = spreader(
+                request.body,
+                (request.query as unknown) as Partial<T>,
+                (request.files as unknown) as File[],
+            );
             return storage
                 .update(data)
                 .then((value: T) =>
@@ -238,7 +281,7 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
                 );
         });
         this.context.http?.delete(`/${this.name}`, (request: Request, response: Response) => {
-            const data = { ...request.body, ...request.query } as T;
+            const data = spreader(request.body, (request.query as unknown) as Partial<T>);
 
             return storage
                 .delete(data)
@@ -355,30 +398,28 @@ export default class Service<T extends mongoose.Document> implements ServiceInte
     We can shift the authentication code to its own function so its more reusable.
      */
     private authenticate(service: Subservice<T>, key: string) {
-        if (service.authenticate) {
-            Object(this.context)[service.method](
-                `/${this.name}/${key}`,
-                (request: Request, response: Response, next: (data?: unknown) => unknown) => {
-                    const data: T & { token: string } = { ...request.body, ...request.query };
-                    /*
-                    This is where the authentication method will go.
-                     */
-                    return Promise.resolve(this.context.authenticate(data))
-                        .then((value) => {
-                            if (!value) throw Error('Oops, authentication error occurred!');
+        Object(this.context)[service.method](
+            `/${this.name}/${key}`,
+            (request: Request, response: Response, next: (data?: unknown) => unknown) => {
+                const data: T & { token: string } = { ...request.body, ...request.query };
+                /*
+                This is where the authentication method will go.
+                 */
+                return Promise.resolve(this.context.authenticate(data))
+                    .then((value) => {
+                        if (!value) throw Error('Oops, authentication error occurred!');
 
-                            next();
-                        })
-                        .catch((error: Error) => {
-                            this.exit(response, data, {
-                                message: 'Oops, authentication error occurred!',
-                                debug: error.message,
-                                status: 412,
-                            });
+                        next();
+                    })
+                    .catch((error: Error) => {
+                        this.exit(response, data, {
+                            message: 'Oops, authentication error occurred!',
+                            debug: error.message,
+                            status: 412,
                         });
-                },
-            );
-        }
+                    });
+            },
+        );
     }
 }
 
@@ -433,12 +474,6 @@ export interface Subservice<T> {
 
 export interface Microservices<T> {
     [route: string]: Subservice<T>;
-}
-
-export interface ServiceInterface {
-    hooks?: ServiceHooks;
-    name: string;
-    context: Ash;
 }
 
 export interface ServiceHooks {

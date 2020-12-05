@@ -6,7 +6,8 @@ export default (app: Ash): void => {
     app.configuration['mongodb'] = configuration.mongodb;
     app.configuration['host'] = configuration.host;
     app.configuration['port'] = configuration.port;
-    app.configuration['public'] = configuration.public;
+    app.configuration['assets'] = configuration.assets;
+    app.configuration['database'] = configuration.database;
 
     /*
     The authentication configuration settings defines the strategy that will be followed when creating the

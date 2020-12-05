@@ -2,7 +2,7 @@ import { AccessService } from './access.class';
 import { Microservices } from '../../declarations';
 import { UserModel } from '../../models/user.model';
 
-export = (access: AccessService): Microservices<UserModel> => ({
+export default (access: AccessService): Microservices<UserModel> => ({
     '': {
         method: 'post',
         message: 'Hi, here is your access token!',
