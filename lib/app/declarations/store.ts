@@ -117,13 +117,13 @@ export default abstract class Store<T extends Model> {
         if (data.page > -1 && data.size > 0) {
             return {
                 page: await this.storage
-                    .find(query)
+                    .find(query as mongoose.FilterQuery<T>)
                     .skip(data.page * data.size)
                     .limit(data.size),
-                length: Math.floor(await this.storage.countDocuments(query)),
+                length: Math.floor(await this.storage.countDocuments(query as mongoose.FilterQuery<T>)),
             };
         }
-        return this.storage.find(query);
+        return this.storage.find(query as mongoose.FilterQuery<T>);
     }
 
     public update(data: T): Promise<T> {
