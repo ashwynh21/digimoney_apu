@@ -23,28 +23,15 @@ export class AccessService extends Service<UserModel> {
         this.addservices(service(this));
     }
 
-    public access(data: UserModel): Promise<UserModel> {
+    public access(data: Partial<UserModel>): Promise<UserModel> {
         if (!data.password) throw Error(constants.strings.incorrect_credentials);
 
         const settings = this.context.configuration['authorization'];
 
-        return (this.context.fetch(settings.entity) as UserService).authorize(data).then((value) => {
+        return this.context.fetch<UserModel, UserService>(settings.entity).authorize(data).then((value) => {
             if (value) {
                 const result = (({ ...value } as unknown) as { _doc: UserModel & { token: string } })._doc;
-                /*
-                Once the user is validated here we then begin generating a valid token using the jwt
-                configuration establish in the above implementation.
-                 */
-                /*
-                This function will be providing a user that has not logged in and does not have a token with
-                 a new access token. We start by defining the structure of the token that will be returned.
-                 */
 
-                /*
-                a smarter way to determine if the user account is verified is through the access token.
-                what we could do is check if the payload of the access token has the mobile field written.
-                if it does not then the user is not to be considered in having a verified account.
-                 */
                 result.token = jwt.sign(
                     {
                         header: {

@@ -16,10 +16,10 @@ export class UserService extends Service<UserModel> {
         super.addservices(services(this));
     }
 
-    public authorize(data: UserModel): Promise<UserModel> {
+    public authorize(data: Partial<UserModel>): Promise<UserModel> {
         if (!data.username) throw Error('Oops, username is required!');
 
-        return (this.context.query('user') as UserStore).storage
+        return this.context.query<UserModel, UserStore>('user').storage
             .findOne({
                 username: data.username,
                 password: data.password,
