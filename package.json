@@ -1,7 +1,7 @@
 {
-  "name": "api",
+  "name": "digimoney_apu",
   "version": "1.0.0",
-  "description": "",
+  "description": "this is my app",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "postinstall": "npm run build",
@@ -10,7 +10,7 @@
     "lint": "eslint --fix --quiet  --ext .ts ."
   },
   "keywords": [],
-  "author": "",
+  "author": "Ashwyn Horton",
   "license": "ISC",
   "dependencies": {
     "axios": "^0.19.2",
@@ -52,8 +52,5 @@
     "webpack": "^4.43.0",
     "webpack-cli": "^3.3.12",
     "webpack-node-externals": "^2.5.2"
-  },
-  "engines": {
-    "node": "12.14.1"
   }
 }

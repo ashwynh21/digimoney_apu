@@ -9,7 +9,7 @@ import services from './user.service';
 export class UserService extends Service<UserModel> {
     constructor(context: Ash) {
         super(context, {
-            name: 'user',
+            name: 'customer',
             store: 'user',
         });
 
@@ -17,12 +17,12 @@ export class UserService extends Service<UserModel> {
     }
 
     public authorize(data: Partial<UserModel>): Promise<UserModel> {
-        if (!data.username) throw Error('Oops, username is required!');
+        if (!data.cellphone) throw Error('Oops, username is required!');
 
         return this.context.query<UserModel, UserStore>('user').storage
             .findOne({
-                username: data.username,
-                password: data.password,
+                cellphone: data.cellphone,
+                pin: data.pin,
             })
             .then((value: UserModel | null) => {
                 if (!value) throw Error('Oops, username or password is incorrect!');

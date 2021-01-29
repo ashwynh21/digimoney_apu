@@ -1,16 +1,16 @@
 {
   "host": "localhost",
-  "port": 4000,
+  "port": "4000",
   "assets": "assets",
   "mongodb": "mongodb://localhost:27017/",
-  "database": "app",
+  "database": "digimoney",
   "authorization": {
     "strategy": "jwt",
-    "secret": "mysecret",
-    "refresh": "mysecret",
+    "secret": "secret",
+    "refresh": "secret",
     "expiration": 300,
     "limit": 2.592e6,
     "entity": "user",
-    "route": "access"
+    "route": "login_customer"
   }
 }

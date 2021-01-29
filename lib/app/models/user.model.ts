@@ -2,20 +2,19 @@ import { Schema } from 'mongoose';
 import { Model } from '../helpers/model';
 
 export interface UserModel extends Model {
-    username: string;
-    password: string;
-
-    access: Array<string>;
+    cellphone: string;
+    pin: string;
+    status: string;
 }
 
 export const UserSchema = new Schema(
     {
-        username: {
+        cellphone: {
             type: String,
             unique: true,
         },
-        password: String,
-        access: [String],
+        pin: String,
+        status: String,
 
         created: Date,
         updated: Date,

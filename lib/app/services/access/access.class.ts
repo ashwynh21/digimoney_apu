@@ -24,7 +24,7 @@ export class AccessService extends Service<UserModel> {
     }
 
     public access(data: Partial<UserModel>): Promise<UserModel> {
-        if (!data.password) throw Error(constants.strings.incorrect_credentials);
+        if (!data.pin) throw Error(constants.strings.incorrect_credentials);
 
         const settings = this.context.configuration['authorization'];
 
