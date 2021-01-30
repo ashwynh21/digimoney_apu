@@ -22,7 +22,7 @@ export const UserSchema = new Schema(
         lastname: String,
         gender: String,
         dob: Date,
-        image: mongoose.Types.Buffer,
+        avatar: String,
         cellphone: {
             type: String,
             unique: true,
