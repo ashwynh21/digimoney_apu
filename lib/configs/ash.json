@@ -2,7 +2,7 @@
   "host": "localhost",
   "port": "4000",
   "assets": "assets",
-  "mongodb": "mongodb://digimoney@Abcd#123+@localhost:27017/",
+  "mongodb": "mongodb://digimoney:Abcd#123+@localhost:27017/",
   "database": "digimoney",
   "authorization": {
     "strategy": "jwt",
