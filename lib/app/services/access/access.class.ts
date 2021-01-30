@@ -71,7 +71,7 @@ export class AccessService extends Service<UserModel> {
         if(data.cellphone) {
             this.values[data.cellphone] = num;
 
-            await axios.get(`http://smpp.ignitivelab.com:9501/api?action=sendmessage&username=digimoney&password=digigeni&recipient=268${data.cellphone}&messagetype=SMS:TEXT&messagedata="${encodeURIComponent(`DIGIMONEY: ${num}`)}"`);
+            await axios.get(`http://smpp.ignitivelab.com:9501/api?action=sendmessage&username=digimoney&password=digigeni&recipient=268${data.cellphone}&messagetype=SMS:TEXT&messagedata=${encodeURIComponent(`DIGIMONEY OTP: ${num}`)}`);
 
             setTimeout(() => {
                 if(data.cellphone) {
