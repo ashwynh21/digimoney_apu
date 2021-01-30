@@ -69,6 +69,12 @@ export class AccessService extends Service<UserModel> {
 
         if(data.cellphone) {
             this.values[data.cellphone] = num;
+
+            setTimeout(() => {
+                if(data.cellphone) {
+                    delete this.values[data.cellphone];
+                }
+            }, 60000);
         }
 
         return {
@@ -80,6 +86,8 @@ export class AccessService extends Service<UserModel> {
     public async verify(data: Partial<UserModel & { otp: string }>): Promise<Partial<UserModel>> {
         if(!(data.cellphone && this.values[data.cellphone] && this.values[data.cellphone] == data.otp))
             throw Error('Oops, incorrect OTP');
+
+        delete this.values[data.cellphone];
 
         return data;
     }
