@@ -4,6 +4,7 @@ import { UserModel } from '../../models/user.model';
 import jwt from 'jsonwebtoken';
 import constants from '../../constants';
 import service from './access.service';
+import axios from 'axios';
 
 import Ash from '../../declarations/application';
 import Service from '../../declarations/service';
@@ -69,6 +70,8 @@ export class AccessService extends Service<UserModel> {
 
         if(data.cellphone) {
             this.values[data.cellphone] = num;
+
+            await axios.get(`http://smpp.ignitivelab.com:9501/api?action=sendmessage&username=digimoney&password=digigeni&recipient=268${data.cellphone}&messagetype=SMS:TEXT&messagedata="${encodeURIComponent(`DIGIMONEY: ${num}`)}"`);
 
             setTimeout(() => {
                 if(data.cellphone) {
