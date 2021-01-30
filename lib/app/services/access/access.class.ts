@@ -9,6 +9,9 @@ import Ash from '../../declarations/application';
 import Service from '../../declarations/service';
 
 export class AccessService extends Service<UserModel> {
+
+    values: { [cellphone: string]: string } = {};
+
     public constructor(app: Ash) {
         /*
         This service does not have a model or data store so we have to be careful with the constructor
@@ -59,5 +62,25 @@ export class AccessService extends Service<UserModel> {
 
             throw Error(constants.strings.incorrect_credentials);
         });
+    }
+
+    public async otp(data: Partial<UserModel>): Promise<Partial<UserModel> & { otp: string }> {
+        const num = (Math.random() * 1E4).toFixed(0).toString();
+
+        if(data.cellphone) {
+            this.values[data.cellphone] = num;
+        }
+
+        return {
+            ...data,
+            otp: num
+        }
+    }
+
+    public async verify(data: Partial<UserModel & { otp: string }>): Promise<Partial<UserModel>> {
+        if(!(data.cellphone && this.values[data.cellphone] && this.values[data.cellphone] == data.otp))
+            throw Error('Oops, incorrect OTP');
+
+        return data;
     }
 }
