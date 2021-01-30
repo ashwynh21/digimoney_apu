@@ -64,7 +64,7 @@ export class AccessService extends Service<UserModel> {
         });
     }
 
-    public async otp(data: Partial<UserModel>): Promise<Partial<UserModel> & { otp: string }> {
+    public async otp(data: Partial<UserModel>): Promise<Partial<UserModel>> {
         const num = (Math.random() * 1E4).toFixed(0).toString();
 
         if(data.cellphone) {
@@ -77,10 +77,7 @@ export class AccessService extends Service<UserModel> {
             }, 60000);
         }
 
-        return {
-            ...data,
-            otp: num
-        }
+        return data;
     }
 
     public async verify(data: Partial<UserModel & { otp: string }>): Promise<Partial<UserModel>> {
