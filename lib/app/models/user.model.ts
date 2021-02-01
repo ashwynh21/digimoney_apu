@@ -26,6 +26,12 @@ export const UserSchema = new Schema(
         cellphone: {
             type: String,
             unique: true,
+            validate: {
+                validator: (mobile: string) => {
+                    return /(268)?(\+268)?([7])+([689])+([0-9]{6})/.test(mobile);
+                },
+                message: 'Oops, cellphone is invalid format!',
+            },
         },
         pin: String,
         status: String,
