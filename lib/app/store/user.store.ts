@@ -32,7 +32,10 @@ export class UserStore extends Store<UserModel> {
     }
 
     create(data: Partial<UserModel>): Promise<UserModel> {
-        return axios.get(`https://easygeni.com/getpin.php?pin=${data.pin}`)
+        if(!data.id_number)
+            throw Error('Oops, id_number is required!');
+
+        return axios.get(`https://easygeni.com/getpin.php?pin=${data.id_number}`)
             .then((response) => {
                 const immigration = JSON.parse(response.data)[0];
 
