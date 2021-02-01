@@ -1,6 +1,5 @@
 import { Schema } from 'mongoose';
 import { Model } from '../helpers/model';
-import mongoose from 'mongoose';
 
 export interface UserModel extends Model {
     firstname: string;
@@ -13,6 +12,7 @@ export interface UserModel extends Model {
     cellphone: string;
     pin: string;
     status: string;
+    id_number: string;
 }
 
 export const UserSchema = new Schema(
@@ -29,6 +29,10 @@ export const UserSchema = new Schema(
         },
         pin: String,
         status: String,
+        id_number: {
+            type: String,
+            unique: true,
+        },
 
         created: Date,
         updated: Date,
