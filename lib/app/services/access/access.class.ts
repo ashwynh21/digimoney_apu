@@ -32,7 +32,7 @@ export class AccessService extends Service<UserModel> {
 
         const settings = this.context.configuration['authorization'];
 
-        return this.context.fetch<UserModel, UserService>(settings.entity).authorize(data).then((value) => {
+        return this.context.fetch<UserModel, UserService>('customer').authorize(data).then((value) => {
             if (value) {
                 const result = (({ ...value } as unknown) as { _doc: UserModel & { token: string } })._doc;
 
