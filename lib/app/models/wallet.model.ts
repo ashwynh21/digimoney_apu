@@ -17,7 +17,7 @@ export const WalletSchema = new mongoose.Schema({
         type: mongoose.Types.ObjectId
     },
     type: String,
-    balane: Number,
+    balance: Number,
     name: String,
 
     status: String,
