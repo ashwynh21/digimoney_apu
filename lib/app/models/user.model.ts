@@ -33,7 +33,10 @@ export const UserSchema = new Schema(
                 message: 'Oops, cellphone is invalid format!',
             },
         },
-        pin: String,
+        pin: {
+            type: String,
+            select: false,
+        },
         status: String,
         id_number: {
             type: String,

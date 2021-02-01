@@ -8,6 +8,8 @@ import axios from 'axios';
 
 import Ash from '../../declarations/application';
 import Service from '../../declarations/service';
+import { WalletModel } from '../../models/wallet.model';
+import { WalletStore } from '../../store/wallet.store';
 
 export class AccessService extends Service<UserModel> {
 
@@ -33,35 +35,41 @@ export class AccessService extends Service<UserModel> {
         const settings = this.context.configuration['authorization'];
 
         return this.context.fetch<UserModel, UserService>('customer').authorize(data).then((value) => {
-            if (value) {
-                const result = (({ ...value } as unknown) as { _doc: UserModel & { token: string } })._doc;
+            return this.context.query<WalletModel, WalletStore>('wallet').storage.findOne({
+                customer: value._id
+            })
+                .then((wallet: WalletModel) => {
 
-                result.token = jwt.sign(
-                    {
-                        header: {
-                            alg: 'HS256',
-                            typ: 'JWT',
-                        },
-                        payload: result,
-                        signature: {
-                            iss: 'info@' + this.context.configuration['host'],
-                            sub: 'info@' + this.context.configuration['host'],
-                            aud: this.context.configuration['host'],
-                            iat: Date.now(),
-                            exp: Date.now() + settings.expiration,
-                        },
-                    },
-                    settings.secret,
-                    {
-                        algorithm: 'HS256',
-                        expiresIn: settings.expiration,
-                    },
-                );
+                    if (value && wallet) {
+                        const result = (({ ...value, wallet } as unknown) as { _doc: UserModel & { token: string } })._doc;
 
-                return result;
-            }
+                        result.token = jwt.sign(
+                            {
+                                header: {
+                                    alg: 'HS256',
+                                    typ: 'JWT',
+                                },
+                                payload: result,
+                                signature: {
+                                    iss: 'info@' + this.context.configuration['host'],
+                                    sub: 'info@' + this.context.configuration['host'],
+                                    aud: this.context.configuration['host'],
+                                    iat: Date.now(),
+                                    exp: Date.now() + settings.expiration,
+                                },
+                            },
+                            settings.secret,
+                            {
+                                algorithm: 'HS256',
+                                expiresIn: settings.expiration,
+                            },
+                        );
 
-            throw Error(constants.strings.incorrect_credentials);
+                        return result;
+                    }
+
+                    throw Error(constants.strings.incorrect_credentials);
+                })
         });
     }
 
