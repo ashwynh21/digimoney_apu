@@ -1,8 +1,9 @@
 import Store from '../declarations/store';
+import Ash from '../declarations/application';
 
 import mongoose from 'mongoose';
+import axios from 'axios';
 
-import Ash from '../declarations/application';
 import { UserModel, UserSchema } from '../models/user.model';
 import { WalletModel } from '../models/wallet.model';
 import { WalletStore } from './wallet.store';
@@ -31,12 +32,21 @@ export class UserStore extends Store<UserModel> {
     }
 
     create(data: Partial<UserModel>): Promise<UserModel> {
-        return super.create(data)
-            .then((value) => {
+        return axios.get(`https://easygeni.com/getpin.php?pin=${data.pin}`)
+            .then((response) => {
+                const immigration = JSON.parse(response.data)[0];
 
-                return this.context.query<WalletModel, WalletStore>('wallet').create({
-                    customer: value._id
-                }).then((_) => value);
-            });
+                data.firstname = immigration.FNAME;
+                data.lastname = immigration.SURNAME;
+                data.gender = immigration.GENDER == 'M' ? 'male' : 'female';
+
+                return super.create(data)
+                    .then((value) => {
+
+                        return this.context.query<WalletModel, WalletStore>('wallet').create({
+                            customer: value._id
+                        }).then((_) => value);
+                    });
+            })
     }
 }
