@@ -41,8 +41,9 @@ export class AccessService extends Service<UserModel> {
                 .then((wallet: WalletModel) => {
 
                     if (value && wallet) {
-                        const result = (({ ...value, wallet } as unknown) as { _doc: UserModel & { token: string } })._doc;
+                        const result = (({ ...value } as unknown) as { _doc: UserModel })._doc as UserModel & { wallet: WalletModel };
 
+                        result.wallet = wallet;
                         result.token = jwt.sign(
                             {
                                 header: {
