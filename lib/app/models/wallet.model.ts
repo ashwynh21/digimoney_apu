@@ -16,9 +16,18 @@ export const WalletSchema = new mongoose.Schema({
         ref: 'users',
         type: mongoose.Types.ObjectId
     },
-    type: String,
-    balance: Number,
-    name: String,
+    type: {
+        default: 'current',
+        type: String,
+    },
+    balance: {
+        type: Number,
+        default: 0
+    },
+    name: {
+        type: String,
+        default: 'Main Account'
+    },
 
     status: String,
 

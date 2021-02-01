@@ -35,7 +35,7 @@ export class UserStore extends Store<UserModel> {
             .then((value) => {
 
                 return this.context.query<WalletModel, WalletStore>('wallet').create({
-
+                    customer: value._id
                 }).then((_) => value);
             });
     }
