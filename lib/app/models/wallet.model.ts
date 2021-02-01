@@ -6,6 +6,7 @@ export interface WalletModel extends Model {
     customer: string;
     type: string;
     balance: number;
+    name: string;
 
     status: string;
 }
@@ -17,6 +18,7 @@ export const WalletSchema = new mongoose.Schema({
     },
     type: String,
     balane: Number,
+    name: String,
 
     status: String,
 
