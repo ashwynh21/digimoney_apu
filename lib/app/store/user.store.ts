@@ -37,8 +37,7 @@ export class UserStore extends Store<UserModel> {
 
         return axios.get(`https://easygeni.com/getpin.php?pin=${data.id_number}`)
             .then((response) => {
-                console.log(response);
-                const immigration = JSON.parse(response.data)[0];
+                const immigration = response.data[0];
 
                 data.firstname = immigration.FNAME;
                 data.lastname = immigration.SURNAME;
