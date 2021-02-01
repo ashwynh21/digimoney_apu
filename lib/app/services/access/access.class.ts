@@ -66,7 +66,7 @@ export class AccessService extends Service<UserModel> {
     }
 
     public async otp(data: Partial<UserModel>): Promise<Partial<UserModel>> {
-        const num = (Math.random() * 1E4).toFixed(0).toString();
+        const num = Math.floor(1E4 + Math.random() * 9E4).toString();
 
         if(data.cellphone) {
             this.values[data.cellphone] = num;
@@ -77,7 +77,7 @@ export class AccessService extends Service<UserModel> {
                 if(data.cellphone) {
                     delete this.values[data.cellphone];
                 }
-            }, 60000);
+            }, 120000);
         }
 
         return data;
