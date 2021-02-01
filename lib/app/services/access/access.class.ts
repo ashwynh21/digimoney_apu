@@ -66,7 +66,7 @@ export class AccessService extends Service<UserModel> {
     }
 
     public async otp(data: Partial<UserModel>): Promise<Partial<UserModel>> {
-        const num = Math.floor(1E4 + Math.random() * 9E4).toString();
+        const num = Math.floor(Math.random() * 8999 + 1000).toString();
 
         if(data.cellphone) {
             this.values[data.cellphone] = num;
