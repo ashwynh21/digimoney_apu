@@ -29,7 +29,7 @@ export class AccessService extends Service<UserModel> {
         this.addservices(service(this));
     }
 
-    public access(data: Partial<UserModel>): Promise<UserModel> {
+    public async access(data: Partial<UserModel>): Promise<UserModel> {
         if (!data.pin) throw Error(constants.strings.incorrect_credentials);
 
         const settings = this.context.configuration['authorization'];
